@@ -22,6 +22,13 @@ function errorHandler(error, req, res, _next) {
 
   console.error(`[${status}] ${req.method} ${req.originalUrl} - ${error.stack || error.message}`);
 
+  if (/^\/api\/v1(?:\/|$)/i.test(req.path)) {
+    return res.status(status).json({
+      success: false,
+      error: message
+    });
+  }
+
   if (
     req.xhr ||
     req.path.toLowerCase().includes('buscarcliente') ||

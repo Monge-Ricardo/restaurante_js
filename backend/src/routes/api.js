@@ -19,6 +19,6 @@ router.get('/health', (_req, res) => {
 // router.use('/platos', require('./api/platosRoutes'));
 // router.use('/clientes', require('./api/clientesRoutes'));
 // router.use('/categorias', require('./api/categoriasRoutes'));
-// router.use('/facturas', require('./api/facturacionRoutes'));
+router.use('/facturas', require('./api/facturacionRoutes'));
 
 module.exports = router;
