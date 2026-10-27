@@ -2,7 +2,7 @@
 
 const express = require('express');
 const router = express.Router();
-const controller = require('../../controllers/api/clientesApiController');
+const controller = require('../../controllers/api/ClientesApiController');
 
 router.get('/', controller.listar);
 router.get('/:id', controller.obtenerPorId);

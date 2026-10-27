@@ -4,21 +4,15 @@ const {
   mapCliente,
   mapEmpleado,
   mapEmpresa,
-  mapFactura,
-  mapPlato,
-  sumarDetalles
+  mapPlato
 } = require('../../utils/documents');
 const { roundMoney, toDecimal128 } = require('../../utils/format');
 const { nextSequentialId } = require('../../utils/ids');
 const { createHttpError } = require('../../utils/http');
+const Factura = require('../../models/Factura');
 
 function serializarFactura(documento) {
-  const factura = mapFactura(documento);
-  return {
-    ...factura,
-    estado: documento.estado || 'EMITIDA',
-    totales: sumarDetalles(factura)
-  };
+  return Factura.fromDatabase(documento).toJSON();
 }
 
 function leerId(valor, campo) {
@@ -188,8 +182,8 @@ async function emitir(req, res) {
   const empleado = mapEmpleado(empleadoDoc);
   const empresa = mapEmpresa(empresaDoc);
 
-  const factura = {
-    _id: await nextSequentialId(context.facturas, 'FAC'),
+  const factura = new Factura({
+    id_factura: await nextSequentialId(context.facturas, 'FAC'),
     fecha: new Date(),
     estado: 'EMITIDA',
     cliente: {
@@ -232,22 +226,27 @@ async function emitir(req, res) {
         total: toDecimal128(total)
       };
     })
-  };
+  });
+
+  const validacion = factura.validar();
+  if (!validacion.esValido) {
+    throw createHttpError(400, 'La factura calculada no cumple las reglas del modelo.');
+  }
 
   for (let intento = 0; ; intento += 1) {
     try {
-      await context.facturas.insertOne(factura);
+      await context.facturas.insertOne(factura.toDatabaseDocument());
       break;
     } catch (error) {
       if (error && error.code === 11000 && intento < 2) {
-        factura._id = await nextSequentialId(context.facturas, 'FAC');
+        factura.id_factura = await nextSequentialId(context.facturas, 'FAC');
         continue;
       }
       throw error;
     }
   }
 
-  return res.status(201).json({ success: true, data: serializarFactura(factura) });
+  return res.status(201).json({ success: true, data: factura.toJSON() });
 }
 
 async function anular(req, res) {
