@@ -3,6 +3,7 @@
 const express = require('express');
 const router = express.Router();
 
+
 // Ruta de comprobación de salud de la API
 router.get('/health', (_req, res) => {
   return res.json({
@@ -13,6 +14,8 @@ router.get('/health', (_req, res) => {
     }
   });
 });
+
+router.use('/platos', require('./api/platosRoutes'));
 
 // Los módulos de cada integrante se montan aquí:
 // router.use('/empresas', require('./api/empresasRoutes'));
