@@ -1,0 +1,17 @@
+    </main>
+  </div>
+
+  <footer class="border-top footer text-muted mt-5 py-3">
+    <div class="container">
+      &copy; 2026 - Restaurante_GR07
+    </div>
+  </footer>
+
+  <script src="/Scripts/bootstrap.bundle.min.js"></script>
+  <% if (typeof pageScripts !== 'undefined' && Array.isArray(pageScripts)) { %>
+    <% pageScripts.forEach(function (script) { %>
+      <script src="<%= script %>"></script>
+    <% }); %>
+  <% } %>
+</body>
+</html>

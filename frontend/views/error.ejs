@@ -1,0 +1,26 @@
+<%- include('partials/header', { title: title }) %>
+
+<div class="container mt-5">
+  <div class="row justify-content-center">
+    <div class="col-md-8">
+      <div class="card shadow-sm border-0" style="border-radius: 15px;">
+        <div class="card-body p-5 text-center">
+          <div class="display-4 mb-2"><%= status === 404 ? '🔎' : (status === 403 ? '🚫' : '⚠️') %></div>
+          <h2 class="fw-bold mb-2">Error <%= status %></h2>
+          <p class="text-muted mb-4"><%= message %></p>
+
+          <% if (detail) { %>
+            <pre class="text-start bg-light border rounded p-3 small text-danger" style="max-height: 220px; overflow: auto;"><%= detail %></pre>
+          <% } %>
+
+          <div class="d-flex justify-content-center gap-2">
+            <a href="javascript:history.back()" class="btn btn-outline-secondary">Volver</a>
+            <a href="<%= currentUser ? '/Home/Index' : '/Account/Login' %>" class="btn btn-primary">Ir al inicio</a>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<%- include('partials/footer') %>

@@ -1,0 +1,75 @@
+<%- include('../partials/header', { title: title }) %>
+
+<div class="container mt-5">
+  <div class="row justify-content-center">
+    <div class="col-md-7">
+      <div class="card shadow border-0" style="border-radius: 15px;">
+        <div class="card-header bg-primary text-white py-3">
+          <h4 class="mb-0 fw-bold">🍔 Agregar Nuevo Plato al Menú</h4>
+        </div>
+        <div class="card-body p-4">
+          <form id="formPlato" action="/Platos/Crear" method="post" enctype="multipart/form-data">
+            <input type="hidden" name="_csrf" value="<%= csrfToken %>" />
+
+            <div class="mb-3">
+              <label for="nombre" class="form-label fw-bold text-secondary">Nombre del Plato</label>
+              <input type="text" id="nombre" name="nombre" class="form-control" placeholder="Ej. Hamburguesa Monster Doble" required value="<%= plato.nombre || '' %>" />
+              <% const errorNombre = fieldError(errors, 'nombre'); %>
+              <% if (errorNombre) { %><span class="text-danger small"><%= errorNombre.message %></span><% } %>
+            </div>
+
+            <div class="row mb-3">
+              <div class="col-md-6">
+                <label for="id_categoria" class="form-label fw-bold text-secondary">Categoría del Plato</label>
+                <select id="id_categoria" name="id_categoria" class="form-select" required>
+                  <option value="">-- Seleccione una categoría --</option>
+                  <% categorias.forEach(function (categoria) { %>
+                    <option value="<%= categoria.id_categoria %>" <%= plato.categoria && plato.categoria.id_categoria === categoria.id_categoria ? 'selected' : '' %>><%= categoria.nombre %></option>
+                  <% }); %>
+                </select>
+                <% const errorCategoria = fieldError(errors, 'id_categoria'); %>
+                <% if (errorCategoria) { %><span class="text-danger small"><%= errorCategoria.message %></span><% } %>
+              </div>
+
+              <div class="col-md-6">
+                <label for="precioInput" class="form-label fw-bold text-secondary">Precio de Venta ($)</label>
+                <input type="text" name="precioTexto" id="precioInput" class="form-control" placeholder="0.00" required value="<%= formatMoney(plato.precio || 0) %>" />
+                <span id="errorPrecio" class="text-danger small fw-bold" style="display:none; margin-top: 5px;"></span>
+                <% const errorPrecio = fieldError(errors, 'precio'); %>
+                <% if (errorPrecio) { %><span class="text-danger small"><%= errorPrecio.message %></span><% } %>
+              </div>
+            </div>
+
+            <div class="mb-3">
+              <label for="descripcion" class="form-label fw-bold text-secondary">Descripción del Plato</label>
+              <textarea id="descripcion" name="descripcion" class="form-control" rows="3" placeholder="Detalla los ingredientes o preparación del plato..." required><%= plato.descripcion || '' %></textarea>
+              <% const errorDescripcion = fieldError(errors, 'descripcion'); %>
+              <% if (errorDescripcion) { %><span class="text-danger small"><%= errorDescripcion.message %></span><% } %>
+            </div>
+
+            <div class="mb-4">
+              <label class="form-label fw-bold text-secondary">Fotografía del Plato</label>
+              <input type="file" name="fotoArchivo" id="fotoArchivo" class="form-control" accept="image/*" onchange="previewImage(event)" required />
+              <small class="text-muted">Formatos permitidos: .jpg, .jpeg, .png, .webp, .gif. Máximo 5 MB.</small>
+              <% const errorImagen = fieldError(errors, 'imagen'); %>
+              <% if (errorImagen) { %><span class="text-danger small d-block"><%= errorImagen.message %></span><% } %>
+
+              <div class="mt-3 text-center">
+                <img id="vistaPrevia" src="#" class="img-thumbnail d-none" style="max-height: 160px; width: 160px; object-fit: cover; border-radius: 10px;" alt="Previsualización" />
+              </div>
+            </div>
+
+            <hr class="text-muted" />
+
+            <div class="d-flex justify-content-end gap-2">
+              <a href="/Platos" class="btn btn-outline-secondary px-4">Cancelar</a>
+              <button type="submit" class="btn btn-primary px-4 fw-bold shadow-sm">Guardar Plato</button>
+            </div>
+          </form>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<%- include('../partials/footer', { pageScripts: ['/Scripts/validaciones.js', '/Scripts/platos-form.js'] }) %>

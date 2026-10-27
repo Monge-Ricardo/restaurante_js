@@ -1,0 +1,180 @@
+<%- include('../partials/header', { title: title }) %>
+
+<%
+  const cliente = clientePorDefecto || {};
+  const valorCedula = cliente.cedula || '9999999999';
+  const valorNombre = cliente.nombre || 'Consumidor';
+  const valorApellido = cliente.apellido || 'Final';
+  const valorTelefono = cliente.telefono || '9999999999';
+  const valorCorreo = cliente.correo || 'consumidorfinal@restaurante.com';
+%>
+
+<div class="container mt-5">
+  <div class="d-flex justify-content-between align-items-center mb-4">
+    <div>
+      <h2 class="fw-bold text-dark">Módulo de Facturación</h2>
+      <p class="text-muted">Ingresa los datos del cliente, selecciona el local y abre las categorías para añadir platos.</p>
+    </div>
+    <a href="/Home/Index" class="btn btn-outline-secondary">Volver al Panel</a>
+  </div>
+
+  <form id="formFacturacion" action="/Facturacion/ProcesarSeleccion" method="post">
+    <input type="hidden" name="_csrf" value="<%= csrfToken %>" />
+
+    <%# ── DATOS DEL CLIENTE ── %>
+    <div class="card shadow-sm border-0 mb-4" style="border-radius: 12px;">
+      <div class="card-header bg-secondary text-white py-3">
+        <div class="d-flex justify-content-between align-items-center">
+          <h5 class="mb-0 fw-bold">Datos de Facturación del Cliente</h5>
+          <button type="button" class="btn btn-sm btn-light fw-bold" onclick="cargarConsumidorFinal()">
+            Cargar Consumidor Final
+          </button>
+        </div>
+      </div>
+      <div class="card-body p-4">
+        <div class="row">
+          <div class="col-md-4 mb-3">
+            <label class="form-label fw-bold text-secondary" for="cedula_cliente">Cédula / Identificación</label>
+            <div class="input-group">
+              <input type="text"
+                     name="cedula_cliente"
+                     id="cedula_cliente"
+                     class="form-control"
+                     value="<%= valorCedula %>"
+                     required
+                     maxlength="10"
+                     inputmode="numeric"
+                     autocomplete="off" />
+              <span class="input-group-text bg-white" id="spinner-busqueda" style="display:none;">
+                <span class="spinner-border spinner-border-sm text-primary" role="status" aria-hidden="true"></span>
+              </span>
+            </div>
+            <small id="cedulaHelp" class="form-text text-muted">Al digitar 10 dígitos se buscará al cliente automáticamente.</small>
+          </div>
+          <div class="col-md-4 mb-3">
+            <label class="form-label fw-bold text-secondary" for="nombre_cliente">Nombre</label>
+            <input type="text" name="nombre_cliente" id="nombre_cliente" class="form-control"
+                   value="<%= valorNombre %>" required maxlength="50" />
+          </div>
+          <div class="col-md-4 mb-3">
+            <label class="form-label fw-bold text-secondary" for="apellido_cliente">Apellido</label>
+            <input type="text" name="apellido_cliente" id="apellido_cliente" class="form-control"
+                   value="<%= valorApellido %>" required maxlength="50" />
+          </div>
+        </div>
+        <div class="row">
+          <div class="col-md-4 mb-3">
+            <label class="form-label fw-bold text-secondary" for="tel_cliente">Teléfono (Opcional)</label>
+            <input type="text" name="tel_cliente" id="tel_cliente" class="form-control"
+                   value="<%= valorTelefono %>" maxlength="10" inputmode="numeric" />
+          </div>
+          <div class="col-md-4 mb-3">
+            <label class="form-label fw-bold text-secondary" for="correo_cliente">Correo Electrónico (Opcional)</label>
+            <input type="email" name="correo_cliente" id="correo_cliente" class="form-control"
+                   value="<%= valorCorreo %>" maxlength="100" />
+          </div>
+          <div class="col-md-4 mb-3">
+            <label class="form-label fw-bold text-primary" for="id_empresa">Sucursal Emisora</label>
+            <select name="id_empresa" id="id_empresa" class="form-select border-primary" required>
+              <option value="">-- Seleccione el Local --</option>
+              <% empresas.forEach(function (empresa) { %>
+                <option value="<%= empresa.id_empresa %>"><%= empresa.nombre %></option>
+              <% }); %>
+            </select>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <%# ── MENÚ POR CATEGORÍAS (ACCORDION) ── %>
+    <div class="accordion shadow-sm" id="accordionMenu" style="border-radius: 12px; overflow: hidden;">
+      <% categorias.forEach(function (categoria, indice) { %>
+        <%
+          const posicion = indice + 1;
+          const collapseId = 'collapse_' + posicion;
+          const headingId = 'heading_' + posicion;
+          const abierta = indice === 0;
+        %>
+        <div class="accordion-item border-bottom">
+          <h2 class="accordion-header" id="<%= headingId %>">
+            <button class="accordion-button fw-bold text-primary bg-light <%= abierta ? '' : 'collapsed' %>"
+                    type="button"
+                    data-bs-toggle="collapse"
+                    data-bs-target="#<%= collapseId %>"
+                    aria-expanded="<%= abierta ? 'true' : 'false' %>"
+                    aria-controls="<%= collapseId %>">
+              <%= categoria.nombre %>
+              <span class="badge bg-primary ms-2"><%= categoria.platos.length %> Disponibles</span>
+            </button>
+          </h2>
+          <div id="<%= collapseId %>" class="accordion-collapse collapse <%= abierta ? 'show' : '' %>"
+               aria-labelledby="<%= headingId %>" data-bs-parent="#accordionMenu">
+            <div class="accordion-body p-0">
+              <% if (categoria.platos.length === 0) { %>
+                <div class="p-4 text-center text-muted small">No hay platos activos en esta categoría.</div>
+              <% } else { %>
+                <div class="table-responsive">
+                  <table class="table table-hover align-middle mb-0">
+                    <thead class="table-light text-secondary small text-uppercase">
+                      <tr>
+                        <th style="width: 12%" class="ps-4">Imagen</th>
+                        <th style="width: 25%">Plato</th>
+                        <th style="width: 33%">Descripción</th>
+                        <th style="width: 15%">Precio Base</th>
+                        <th style="width: 15%" class="text-center pe-4">Cantidad</th>
+                      </tr>
+                    </thead>
+                    <tbody>
+                      <% categoria.platos.forEach(function (plato) { %>
+                        <tr>
+                          <td class="ps-4">
+                            <% if (plato.imagen) { %>
+                              <img src="<%= plato.imagen %>" class="img-thumbnail rounded"
+                                   style="width: 60px; height: 60px; object-fit: cover;"
+                                   alt="<%= plato.nombre %>" />
+                            <% } else { %>
+                              <div class="bg-light text-muted d-flex align-items-center justify-content-center rounded border"
+                                   style="width: 60px; height: 60px; font-size: 0.7rem;">Sin Foto</div>
+                            <% } %>
+                          </td>
+                          <td>
+                            <span class="fw-bold text-dark d-block"><%= plato.nombre %></span>
+                            <span class="text-muted small">Ref: <%= plato.id_plato %></span>
+                          </td>
+                          <td>
+                            <p class="text-muted small mb-0 text-truncate" style="max-width: 300px;"><%= plato.descripcion %></p>
+                          </td>
+                          <td>
+                            <span class="fw-bold text-dark">$<%= formatMoney(plato.precio) %></span>
+                          </td>
+                          <td class="pe-4">
+                            <input type="number"
+                                   name="cantidades[<%= plato.id_plato %>]"
+                                   class="form-control text-center border-primary-subtle fw-bold"
+                                   value="0" min="0" max="50" step="1"
+                                   inputmode="numeric"
+                                   aria-label="Cantidad de <%= plato.nombre %>"
+                                   style="border-radius: 8px;" />
+                          </td>
+                        </tr>
+                      <% }); %>
+                    </tbody>
+                  </table>
+                </div>
+              <% } %>
+            </div>
+          </div>
+        </div>
+      <% }); %>
+    </div>
+
+    <%# ── BOTÓN GENERAR ── %>
+    <div class="card shadow-sm border-0 bg-dark text-white p-3 mt-4 mb-5" style="border-radius: 12px;">
+      <div class="d-flex justify-content-between align-items-center">
+        <button type="submit" class="btn btn-success px-5 fw-bold shadow">Generar Factura</button>
+      </div>
+    </div>
+  </form>
+</div>
+
+<%- include('../partials/footer', { pageScripts: ['/Scripts/validaciones.js', '/Scripts/facturacion-pos.js'] }) %>

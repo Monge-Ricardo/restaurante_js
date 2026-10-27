@@ -1,0 +1,64 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title><%= title %> - Restaurante_GR07</title>
+  <link rel="stylesheet" href="/Content/bootstrap.min.css" />
+  <link rel="stylesheet" href="/Content/site.css" />
+</head>
+<body>
+  <header>
+    <nav class="navbar navbar-expand-sm navbar-toggleable-sm navbar-light bg-white border-bottom box-shadow mb-3">
+      <div class="container-fluid">
+        <a class="navbar-brand" href="<%= currentUser ? '/Home/Index' : '/Account/Login' %>">Restaurante GR07</a>
+        <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target=".navbar-collapse"
+                aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="Toggle navigation">
+          <span class="navbar-toggler-icon"></span>
+        </button>
+        <div class="navbar-collapse collapse d-sm-inline-flex justify-content-between">
+          <ul class="navbar-nav flex-grow-1">
+            <% if (currentUser) { %>
+              <li class="nav-item">
+                <a class="nav-link text-dark" href="/Home/Index">Inicio</a>
+              </li>
+              <% if (tienePermiso('ver_cliente')) { %>
+                <li class="nav-item"><a class="nav-link text-dark" href="/Clientes">Clientes</a></li>
+              <% } %>
+              <% if (tienePermiso('ver_empresa')) { %>
+                <li class="nav-item"><a class="nav-link text-dark" href="/Empresas">Empresas</a></li>
+              <% } %>
+              <% if (tienePermiso('ver_platos')) { %>
+                <li class="nav-item"><a class="nav-link text-dark" href="/Platos">Menú (Platos)</a></li>
+              <% } %>
+              <% if (tienePermiso('facturar')) { %>
+                <li class="nav-item"><a class="nav-link text-dark" href="/Facturacion/Crear">Facturar</a></li>
+              <% } %>
+              <% if (tienePermiso('ver_reportes')) { %>
+                <li class="nav-item"><a class="nav-link text-dark" href="/Facturacion/FacturasGuardadas">Historial FAC</a></li>
+              <% } %>
+            <% } %>
+          </ul>
+          <% if (currentUser) { %>
+            <div class="d-flex align-items-center gap-3">
+              <span class="text-muted small">
+                <strong><%= currentUser.nombreCompleto %></strong>
+                <span class="badge bg-light text-primary"><%= currentUser.cargo %></span>
+              </span>
+              <a class="btn btn-outline-danger btn-sm" href="/Account/Logout">Cerrar sesión</a>
+            </div>
+          <% } %>
+        </div>
+      </div>
+    </nav>
+  </header>
+
+  <div class="container">
+    <% if (flash) { %>
+      <div class="alert alert-<%= flash.type === 'success' ? 'success' : 'danger' %> alert-dismissible fade show shadow-sm" role="alert">
+        <strong><%= flash.type === 'success' ? '¡Éxito!' : '¡Atención!' %></strong> <%= flash.message %>
+        <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+      </div>
+    <% } %>
+
+    <main role="main" class="pb-3">

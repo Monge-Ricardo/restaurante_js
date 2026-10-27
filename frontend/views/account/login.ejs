@@ -1,0 +1,46 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title><%= title %> - Restaurante GR07</title>
+  <link rel="stylesheet" href="/Content/bootstrap.min.css" />
+</head>
+<body class="bg-dark d-flex align-items-center justify-content-center" style="height: 100vh; background: linear-gradient(to right, #141e30, #243b55);">
+
+  <div class="card shadow-lg p-4" style="width: 100%; max-width: 400px; border-radius: 12px;">
+    <div class="text-center mb-4">
+      <h3 class="fw-bold text-primary">Restaurante GR07</h3>
+      <p class="text-muted">Control de Acceso</p>
+    </div>
+
+    <% if (typeof error !== 'undefined' && error) { %>
+      <div class="alert alert-danger text-center py-2" role="alert">
+        <%= error %>
+      </div>
+    <% } %>
+
+    <form action="/Account/Login" method="post">
+      <input type="hidden" name="_csrf" value="<%= csrfToken %>" />
+
+      <div class="mb-3">
+        <label for="correo" class="form-label fw-semibold">Correo Electrónico</label>
+        <input type="email" id="correo" name="correo" class="form-control"
+               value="<%= typeof correo !== 'undefined' ? correo : '' %>"
+               placeholder="david.pilatasig@restaurante.com" required autocomplete="username" />
+      </div>
+
+      <div class="mb-4">
+        <label for="password" class="form-label fw-semibold">Contraseña</label>
+        <input type="password" id="password" name="password" class="form-control"
+               placeholder="••••••••" required autocomplete="current-password" />
+      </div>
+
+      <button type="submit" class="btn btn-primary w-100 py-2 fw-bold" style="border-radius: 8px;">
+        Ingresar Sistema
+      </button>
+    </form>
+  </div>
+
+</body>
+</html>

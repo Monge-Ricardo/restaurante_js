@@ -1,0 +1,63 @@
+<%- include('../partials/header', { title: title }) %>
+
+<div class="container mt-5 mb-5">
+  <div class="d-flex justify-content-between align-items-center mb-4">
+    <div>
+      <h2 class="fw-bold text-dark"><%= title %></h2>
+      <p class="text-muted">Listado cronológico de todos los comprobantes emitidos en el sistema.</p>
+    </div>
+    <a href="/Home/Index" class="btn btn-outline-secondary px-3">Volver al Panel</a>
+  </div>
+
+  <div class="card shadow-sm border-0" style="border-radius: 12px;">
+    <div class="card-body p-0">
+      <div class="table-responsive">
+        <table class="table table-hover align-middle mb-0">
+          <thead class="table-light text-uppercase small text-secondary">
+            <tr>
+              <th class="ps-4" style="width: 15%;">No. Factura</th>
+              <th style="width: 20%;">Fecha / Hora</th>
+              <th style="width: 25%;">Sucursal / Local</th>
+              <th style="width: 25%;">Cliente</th>
+              <th class="text-center pe-4" style="width: 15%;">Acción</th>
+            </tr>
+          </thead>
+          <tbody>
+            <% if (!facturas || facturas.length === 0) { %>
+              <tr>
+                <td colspan="5" class="text-center py-5 text-muted">
+                  No se registran facturas guardadas en el sistema.
+                </td>
+              </tr>
+            <% } else { %>
+              <% facturas.forEach(function (factura) { %>
+                <tr>
+                  <td class="ps-4">
+                    <span class="badge bg-dark fw-bold"><%= factura.id_factura %></span>
+                  </td>
+                  <td class="small text-secondary"><%= formatDateTime(factura.fecha) %></td>
+                  <td>
+                    <span class="fw-bold text-dark d-block"><%= factura.empresa ? factura.empresa.nombre : 'N/D' %></span>
+                    <small class="text-muted">ID: <%= factura.empresa ? factura.empresa.id_empresa : 'N/D' %></small>
+                  </td>
+                  <td>
+                    <span class="text-dark d-block">
+                      <%= factura.cliente ? (factura.cliente.nombre || '') + ' ' + (factura.cliente.apellido || '') : 'N/D' %>
+                    </span>
+                    <small class="text-muted">CI: <%= factura.cliente ? factura.cliente.id_cliente : 'N/D' %></small>
+                  </td>
+                  <td class="text-center pe-4">
+                    <a href="/Facturacion/VerFactura/<%= encodeURIComponent(factura.id_factura) %>"
+                       class="btn btn-sm btn-primary fw-bold px-3">Ver Detalle</a>
+                  </td>
+                </tr>
+              <% }); %>
+            <% } %>
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+</div>
+
+<%- include('../partials/footer') %>

@@ -1,0 +1,57 @@
+<%- include('../partials/header', { title: title }) %>
+
+<div class="container mt-5">
+  <div class="row justify-content-center">
+    <div class="col-md-6">
+      <div class="card shadow border-0" style="border-radius: 15px;">
+        <div class="card-header bg-warning text-dark py-3">
+          <h4 class="mb-0 fw-bold">Modificar Empresa / Local</h4>
+        </div>
+        <div class="card-body p-4">
+          <form id="formEditEmpresa" action="/Empresas/Editar/<%= encodeURIComponent(empresa.id_empresa) %>" method="post" enctype="multipart/form-data">
+            <input type="hidden" name="_csrf" value="<%= csrfToken %>" />
+            <input type="hidden" name="id_empresa" value="<%= empresa.id_empresa %>" />
+
+            <div class="mb-3">
+              <label for="rucInput" class="form-label fw-bold text-secondary">RUC del Local</label>
+              <input type="text" id="rucInput" name="ruc" class="form-control" maxlength="13" required value="<%= empresa.ruc || '' %>" />
+              <% const errorRuc = fieldError(errors, 'ruc'); %>
+              <span id="errorRuc" class="text-danger small fw-bold" style="<%= errorRuc ? '' : 'display:none;' %>; margin-top: 5px;"><%= errorRuc ? errorRuc.message : '' %></span>
+            </div>
+
+            <div class="mb-3">
+              <label for="nombre" class="form-label fw-bold text-secondary">Nombre Comercial</label>
+              <input type="text" id="nombre" name="nombre" class="form-control" required maxlength="50" value="<%= empresa.nombre || '' %>" />
+              <% const errorNombre = fieldError(errors, 'nombre'); %>
+              <% if (errorNombre) { %><span class="text-danger small"><%= errorNombre.message %></span><% } %>
+            </div>
+
+            <div class="mb-4">
+              <label class="form-label fw-bold text-secondary">Cambiar Logotipo (Opcional)</label>
+              <input type="file" name="logo" id="logoArchivo" class="form-control" accept="image/*" onchange="previewImage(event)" />
+              <small class="text-muted d-block mt-1">Deje este campo vacío si desea conservar la imagen actual.</small>
+              <% const errorLogo = fieldError(errors, 'logo'); %>
+              <% if (errorLogo) { %><span class="text-danger small d-block"><%= errorLogo.message %></span><% } %>
+              <div class="mt-3 text-center">
+                <% if (empresa.logo) { %>
+                  <img id="vistaPrevia" src="<%= logoSrc(empresa.logo) %>" class="img-thumbnail" style="max-height: 120px; object-fit: cover;" alt="Logo actual" />
+                <% } else { %>
+                  <img id="vistaPrevia" src="#" class="img-thumbnail d-none" style="max-height: 120px; object-fit: cover;" alt="Previsualización" />
+                <% } %>
+              </div>
+            </div>
+
+            <hr class="text-muted" />
+
+            <div class="d-flex justify-content-end gap-2">
+              <a href="/Empresas" class="btn btn-outline-secondary px-4">Cancelar</a>
+              <button type="submit" class="btn btn-warning px-4 fw-bold">Guardar Cambios</button>
+            </div>
+          </form>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<%- include('../partials/footer', { pageScripts: ['/Scripts/validaciones.js', '/Scripts/empresas-form.js'] }) %>

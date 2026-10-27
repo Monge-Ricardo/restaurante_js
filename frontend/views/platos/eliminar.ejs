@@ -1,0 +1,47 @@
+<%- include('../partials/header', { title: title }) %>
+
+<div class="container mt-5">
+  <div class="row justify-content-center">
+    <div class="col-md-6">
+      <div class="card shadow border-0" style="border-radius: 15px;">
+        <div class="card-header bg-danger text-white py-3 text-center" style="border-top-left-radius: 15px; border-top-right-radius: 15px;">
+          <h4 class="mb-0 fw-bold">⚠️ ¿Quitar este plato del menú?</h4>
+        </div>
+
+        <div class="card-body p-4 text-center">
+          <p class="text-muted fs-6 mb-4">
+            Esta acción es <strong>definitiva</strong>. El plato se eliminará del catálogo general del restaurante y dejará de estar disponible para comandas.
+          </p>
+
+          <div class="bg-light p-3 rounded mb-4 border text-start">
+            <div class="d-flex align-items-center gap-3">
+              <div class="flex-shrink-0">
+                <% if (plato.imagen) { %>
+                  <img src="<%= plato.imagen %>" class="img-thumbnail rounded" style="width: 80px; height: 80px; object-fit: cover;" alt="Foto del plato" />
+                <% } else { %>
+                  <div class="bg-secondary text-white d-flex align-items-center justify-content-center rounded border fw-bold" style="width: 80px; height: 80px; font-size: 0.8rem;">SIN FOTO</div>
+                <% } %>
+              </div>
+              <div>
+                <h5 class="fw-bold text-dark mb-1"><%= plato.nombre %></h5>
+                <span class="badge bg-primary mb-1">Precio: $<%= formatMoney(plato.precio) %></span>
+                <span class="text-secondary d-block small text-truncate" style="max-width: 300px;"><strong>Descripción:</strong> <%= plato.descripcion %></span>
+                <span class="text-muted d-block small"><strong>Código:</strong> <%= plato.id_plato %></span>
+              </div>
+            </div>
+          </div>
+
+          <form action="/Platos/Eliminar/<%= encodeURIComponent(plato.id_plato) %>" method="post">
+            <input type="hidden" name="_csrf" value="<%= csrfToken %>" />
+            <div class="d-flex justify-content-center gap-2">
+              <a href="/Platos" class="btn btn-outline-secondary px-4">Cancelar y Volver</a>
+              <button type="submit" class="btn btn-danger px-4 fw-bold shadow-sm">Sí, Eliminar Definitivamente</button>
+            </div>
+          </form>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<%- include('../partials/footer') %>

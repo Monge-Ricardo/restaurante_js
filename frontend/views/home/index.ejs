@@ -1,0 +1,88 @@
+<%- include('../partials/header', { title: title }) %>
+
+<div class="container mt-5">
+  <div class="row justify-content-center">
+    <div class="col-md-10">
+      <div class="card shadow-sm border-0 bg-primary text-white p-4 mb-4" style="border-radius: 15px;">
+        <div class="d-flex align-items-center justify-content-between">
+          <div>
+            <h1 class="fw-bold mb-1">¡Bienvenido al Sistema, <%= currentUser.nombreCompleto %>!</h1>
+            <p class="mb-0 opacity-75">Rol asignado: <span class="badge bg-light text-primary fw-bold"><%= currentUser.cargo %></span></p>
+          </div>
+          <div class="fs-1">🍳</div>
+        </div>
+      </div>
+
+      <h4 class="fw-bold mb-3 text-secondary">Módulos del Sistema</h4>
+      <div class="row g-3">
+        <% if (tienePermiso('facturar')) { %>
+          <div class="col-md-4">
+            <div class="card h-100 shadow-sm border-0 p-3" style="border-radius: 10px;">
+              <div class="card-body text-center">
+                <span class="fs-2">📋</span>
+                <h5 class="fw-bold mt-2">Facturación</h5>
+                <p class="text-muted small">Crear comandas y revisar balances de ventas.</p>
+                <a href="/Facturacion/Crear" class="btn btn-primary btn-sm w-100 mt-2">Nueva Factura</a>
+                <% if (tienePermiso('ver_reportes')) { %>
+                  <a href="/Facturacion/FacturasGuardadas" class="btn btn-outline-secondary btn-sm w-100 mt-2">Facturas Guardadas</a>
+                <% } %>
+              </div>
+            </div>
+          </div>
+        <% } %>
+
+        <% if (tienePermiso('ver_platos')) { %>
+          <div class="col-md-4">
+            <div class="card h-100 shadow-sm border-0 p-3" style="border-radius: 10px;">
+              <div class="card-body text-center">
+                <span class="fs-2">🍔</span>
+                <h5 class="fw-bold mt-2">Menú / Platos</h5>
+                <p class="text-muted small">Gestionar el catálogo de platos y categorías.</p>
+                <a href="/Platos" class="btn btn-outline-primary btn-sm w-100 mt-2">Ver Platos</a>
+              </div>
+            </div>
+          </div>
+        <% } %>
+
+        <% if (tienePermiso('ver_empresa')) { %>
+          <div class="col-md-4">
+            <div class="card h-100 shadow-sm border-0 p-3" style="border-radius: 10px;">
+              <div class="card-body text-center">
+                <span class="fs-2">🏪</span>
+                <h5 class="fw-bold mt-2">Empresa</h5>
+                <p class="text-muted small">Gestionar la configuración de los locales.</p>
+                <a href="/Empresas" class="btn btn-outline-primary btn-sm w-100 mt-2">Locales</a>
+              </div>
+            </div>
+          </div>
+        <% } %>
+
+        <% if (tienePermiso('ver_cliente')) { %>
+          <div class="col-md-4">
+            <div class="card h-100 shadow-sm border-0 p-3" style="border-radius: 10px;">
+              <div class="card-body text-center">
+                <span class="fs-2">👥</span>
+                <h5 class="fw-bold mt-2">Clientes</h5>
+                <p class="text-muted small">Ver y gestionar los clientes registrados.</p>
+                <a href="/Clientes" class="btn btn-outline-primary btn-sm w-100 mt-2">Ver Catálogo</a>
+              </div>
+            </div>
+          </div>
+        <% } %>
+
+        <div class="col-md-4">
+          <div class="card h-100 shadow-sm border-0 p-3" style="border-radius: 10px;">
+            <div class="card-body text-center">
+              <span class="fs-2">🚪</span>
+              <h5 class="fw-bold mt-2">Cerrar Sesión</h5>
+              <p class="text-muted small">Salir del sistema de forma segura.</p>
+              <a href="/Account/Logout" class="btn btn-danger btn-sm w-100 mt-2">Salir</a>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<%- include('../partials/footer') %>

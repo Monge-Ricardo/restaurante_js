@@ -1,0 +1,46 @@
+<%- include('../partials/header', { title: title }) %>
+
+<div class="container mt-5">
+  <div class="row justify-content-center">
+    <div class="col-md-6">
+      <div class="card shadow border-0" style="border-radius: 15px;">
+        <div class="card-header bg-danger text-white py-3 text-center" style="border-top-left-radius: 15px; border-top-right-radius: 15px;">
+          <h4 class="mb-0 fw-bold">⚠️ ¿Confirmas eliminar este local?</h4>
+        </div>
+
+        <div class="card-body p-4 text-center">
+          <p class="text-muted fs-6 mb-4">
+            Esta acción es <strong>irreversible</strong>. Se borrarán de forma definitiva todos los datos de configuración correspondientes al siguiente establecimiento:
+          </p>
+
+          <div class="bg-light p-3 rounded mb-4 border text-start">
+            <div class="d-flex align-items-center gap-3">
+              <div class="flex-shrink-0">
+                <% if (empresa.logo) { %>
+                  <img src="<%= logoSrc(empresa.logo) %>" class="img-thumbnail rounded" style="width: 70px; height: 70px; object-fit: cover;" alt="Logo" />
+                <% } else { %>
+                  <div class="bg-secondary text-white d-flex align-items-center justify-content-center rounded border fw-bold" style="width: 70px; height: 70px; font-size: 0.8rem;">SIN LOGO</div>
+                <% } %>
+              </div>
+              <div>
+                <h5 class="fw-bold text-dark mb-1"><%= empresa.nombre %></h5>
+                <span class="text-secondary d-block small"><strong>RUC:</strong> <%= empresa.ruc %></span>
+                <span class="text-secondary d-block small"><strong>ID interno:</strong> <%= empresa.id_empresa %></span>
+              </div>
+            </div>
+          </div>
+
+          <form action="/Empresas/Eliminar/<%= encodeURIComponent(empresa.id_empresa) %>" method="post">
+            <input type="hidden" name="_csrf" value="<%= csrfToken %>" />
+            <div class="d-flex justify-content-center gap-2">
+              <a href="/Empresas" class="btn btn-outline-secondary px-4">Cancelar y Volver</a>
+              <button type="submit" class="btn btn-danger px-4 fw-bold shadow-sm">Sí, Eliminar Definitivamente</button>
+            </div>
+          </form>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<%- include('../partials/footer') %>

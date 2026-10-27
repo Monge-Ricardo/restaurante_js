@@ -1,0 +1,72 @@
+/* Estilos propios del port a Node.js/Express. */
+html {
+  font-size: 15px;
+  position: relative;
+  min-height: 100%;
+}
+
+body {
+  margin-bottom: 60px;
+  background-color: #f8f9fa;
+}
+
+main {
+  min-height: 55vh;
+}
+
+.footer {
+  position: absolute;
+  bottom: 0;
+  width: 100%;
+  white-space: nowrap;
+  line-height: 60px;
+  background-color: #fff;
+}
+
+.card {
+  overflow: hidden;
+}
+
+.accordion-button:not(.collapsed) {
+  box-shadow: none;
+}
+
+.accordion-button:focus {
+  box-shadow: none;
+}
+
+.img-thumbnail {
+  background-color: #fff;
+}
+
+.border-primary-subtle {
+  border-color: #b6d4fe !important;
+}
+
+/* La factura debe imprimirse sin la barra de navegación ni el pie de página. */
+@media print {
+  header,
+  footer,
+  .btn,
+  .navbar {
+    display: none !important;
+  }
+
+  body {
+    background-color: #fff;
+    margin: 0;
+  }
+
+  .card {
+    border: 0 !important;
+    box-shadow: none !important;
+  }
+
+  .card-body {
+    padding: 0 !important;
+  }
+
+  a[href]::after {
+    content: '';
+  }
+}

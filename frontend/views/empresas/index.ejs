@@ -1,0 +1,69 @@
+<%- include('../partials/header', { title: title }) %>
+
+<div class="container mt-5">
+  <div class="d-flex justify-content-between align-items-center mb-4">
+    <div>
+      <h2 class="fw-bold text-dark">Gestión de Locales</h2>
+      <p class="text-muted">Administra los establecimientos.</p>
+    </div>
+    <% if (tienePermiso('crear_empresa')) { %>
+      <a href="/Empresas/Crear" class="btn btn-primary fw-bold shadow-sm">➕ Registrar Nueva Empresa</a>
+    <% } %>
+  </div>
+
+  <% if (error) { %>
+    <div class="alert alert-danger" role="alert"><%= error %></div>
+  <% } %>
+
+  <div class="card shadow-sm border-0" style="border-radius: 12px; overflow: hidden;">
+    <div class="table-responsive">
+      <table class="table table-hover align-middle mb-0">
+        <thead class="table-light text-secondary small text-uppercase">
+          <tr>
+            <th class="ps-4" style="width: 15%;">Logotipo</th>
+            <th style="width: 20%;">RUC / ID</th>
+            <th style="width: 45%;">Nombre Comercial</th>
+            <th class="text-center pe-4" style="width: 20%;">Acciones</th>
+          </tr>
+        </thead>
+        <tbody>
+          <% if (empresas.length === 0) { %>
+            <tr>
+              <td colspan="4" class="text-center py-5 text-muted">No hay locales registrados.</td>
+            </tr>
+          <% } %>
+          <% empresas.forEach(function (item) { %>
+            <tr>
+              <td class="ps-4">
+                <% if (item.logo) { %>
+                  <img src="<%= logoSrc(item.logo) %>" class="img-thumbnail rounded" style="width: 60px; height: 60px; object-fit: cover;" alt="Logo de <%= item.nombre %>" />
+                <% } else { %>
+                  <div class="bg-light text-muted d-flex align-items-center justify-content-center rounded border" style="width: 60px; height: 60px; font-size: 0.7rem;">Sin Logo</div>
+                <% } %>
+              </td>
+              <td>
+                <span class="fw-bold text-dark"><%= item.ruc %></span>
+                <span class="text-muted small d-block">ID: <%= item.id_empresa %></span>
+              </td>
+              <td>
+                <span class="text-dark fw-semibold"><%= item.nombre %></span>
+              </td>
+              <td class="text-center pe-4">
+                <div class="d-inline-flex gap-2">
+                  <% if (tienePermiso('editar_empresa')) { %>
+                    <a href="/Empresas/Editar/<%= encodeURIComponent(item.id_empresa) %>" class="btn btn-warning btn-sm fw-bold px-3">✏️ Editar</a>
+                  <% } %>
+                  <% if (tienePermiso('eliminar_empresa')) { %>
+                    <a href="/Empresas/Eliminar/<%= encodeURIComponent(item.id_empresa) %>" class="btn btn-outline-danger btn-sm px-2" title="Eliminar">🗑️</a>
+                  <% } %>
+                </div>
+              </td>
+            </tr>
+          <% }); %>
+        </tbody>
+      </table>
+    </div>
+  </div>
+</div>
+
+<%- include('../partials/footer') %>

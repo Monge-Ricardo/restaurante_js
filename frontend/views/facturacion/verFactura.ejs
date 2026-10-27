@@ -1,0 +1,122 @@
+<%- include('../partials/header', { title: title }) %>
+
+<%
+  const empresa = factura.empresa || {};
+  const cliente = factura.cliente || {};
+  const empleado = factura.empleado || {};
+  const logo = logoSrc(empresa.logo);
+%>
+
+<div class="container mt-5 mb-5">
+  <div class="row justify-content-center">
+    <div class="col-md-9">
+      <div class="card shadow border-0" style="border-radius: 15px;">
+        <div class="card-body p-5">
+
+          <div class="row border-bottom pb-4 mb-4 align-items-center">
+            <div class="col-md-2 text-center text-md-start mb-3 mb-md-0">
+              <% if (logo) { %>
+                <img src="<%= logo %>" class="img-fluid rounded border shadow-sm"
+                     style="max-height: 80px; width: 80px; object-fit: cover;" alt="Logo" />
+              <% } else { %>
+                <div class="bg-light text-muted d-flex align-items-center justify-content-center rounded border small fw-bold"
+                     style="width: 80px; height: 80px;">Sin Logo</div>
+              <% } %>
+            </div>
+            <div class="col-md-5">
+              <h3 class="fw-bold text-primary mb-1"><%= empresa.nombre || 'Establecimiento' %></h3>
+              <p class="text-muted small mb-0">RUC: <%= empresa.ruc || 'N/D' %></p>
+              <p class="text-muted small mb-0">Fecha Emisión: <%= formatDateTime(factura.fecha) %></p>
+            </div>
+            <div class="col-md-5 text-md-end mt-3 mt-md-0">
+              <h4 class="fw-bold text-dark mb-0">FACTURA</h4>
+              <span class="badge bg-danger fs-5 mt-1"><%= factura.id_factura %></span>
+            </div>
+          </div>
+
+          <div class="row mb-4 bg-light p-3 rounded" style="margin: 0 1px;">
+            <div class="col-md-6">
+              <h6 class="text-secondary fw-bold text-uppercase small mb-2">Datos del Cliente</h6>
+              <p class="mb-1 text-dark"><strong>Cliente:</strong> <%= cliente.nombre || '' %> <%= cliente.apellido || '' %></p>
+              <p class="mb-1 text-dark"><strong>RUC/C.I.:</strong> <%= cliente.cedula || 'N/D' %></p>
+              <p class="mb-0 text-dark"><strong>Email:</strong> <%= cliente.correo || 'N/D' %></p>
+            </div>
+            <div class="col-md-6 mt-3 mt-md-0 border-start-md">
+              <h6 class="text-secondary fw-bold text-uppercase small mb-2">Detalles del Despacho</h6>
+              <p class="mb-1 text-dark"><strong>Atendido por:</strong> <%= empleado.nombre || '' %> <%= empleado.apellido || '' %></p>
+              <p class="mb-0 text-dark"><strong>Establecimiento:</strong> <%= empresa.nombre || 'N/D' %></p>
+            </div>
+          </div>
+
+          <div class="table-responsive mb-4">
+            <table class="table align-middle">
+              <thead class="table-dark text-uppercase small">
+                <tr>
+                  <th style="width: 40%">Descripción del Plato</th>
+                  <th style="width: 10%" class="text-center">Cant.</th>
+                  <th style="width: 15%" class="text-end">Precio U.</th>
+                  <th style="width: 15%" class="text-end">Subtotal</th>
+                  <th style="width: 20%" class="text-end">Total</th>
+                </tr>
+              </thead>
+              <tbody>
+                <% if (factura.detalleFacturas.length === 0) { %>
+                  <tr>
+                    <td colspan="5" class="text-center py-4 text-muted">Esta factura no tiene detalles registrados.</td>
+                  </tr>
+                <% } %>
+                <% factura.detalleFacturas.forEach(function (detalle) { %>
+                  <tr>
+                    <td>
+                      <span class="fw-bold text-dark d-block"><%= detalle.plato ? detalle.plato.nombre : 'Plato no disponible' %></span>
+                      <span class="text-muted small">Cod: <%= detalle.plato ? detalle.plato.id_plato : 'N/D' %></span>
+                    </td>
+                    <td class="text-center fw-bold text-secondary"><%= detalle.cantidad %></td>
+                    <td class="text-end">$<%= formatMoney(detalle.plato ? detalle.plato.precio : 0) %></td>
+                    <td class="text-end">$<%= formatMoney(detalle.subtotal_sin_iva) %></td>
+                    <td class="text-end fw-bold text-dark">$<%= formatMoney(detalle.total) %></td>
+                  </tr>
+                <% }); %>
+              </tbody>
+            </table>
+          </div>
+
+          <div class="row justify-content-end">
+            <div class="col-md-5">
+              <div class="border p-3 rounded bg-light-subtle">
+                <div class="d-flex justify-content-between mb-2">
+                  <span class="text-muted">Subtotal Neto:</span>
+                  <span class="fw-bold text-dark">$<%= formatMoney(resumen.subtotal) %></span>
+                </div>
+                <div class="d-flex justify-content-between mb-2">
+                  <span class="text-muted">IVA (15%):</span>
+                  <span class="fw-bold text-dark">$<%= formatMoney(resumen.iva) %></span>
+                </div>
+                <div class="d-flex justify-content-between mb-2 border-bottom pb-2">
+                  <span class="text-muted">Tarifa de servicio:</span>
+                  <span class="fw-bold text-dark">$<%= formatMoney(resumen.servicio) %></span>
+                </div>
+                <div class="d-flex justify-content-between pt-1">
+                  <span class="fs-5 fw-bold text-dark">Total a Pagar:</span>
+                  <span class="fs-5 fw-bold text-success">$<%= formatMoney(resumen.total) %></span>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <hr class="text-muted mt-5" />
+          <div class="d-flex justify-content-between align-items-center flex-wrap gap-2">
+            <span class="text-muted small">¡Gracias por su compra!</span>
+            <div>
+              <button type="button" class="btn btn-outline-dark me-2" onclick="window.print();">Imprimir</button>
+              <a href="/Home/Index" class="btn btn-primary fw-bold">Volver al Panel</a>
+            </div>
+          </div>
+
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<%- include('../partials/footer') %>
