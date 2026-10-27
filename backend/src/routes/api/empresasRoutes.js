@@ -2,7 +2,7 @@
 
 const express = require('express');
 const { asyncHandler } = require('../../utils/http');
-const empresasApiController = require('../../controllers/api/empresasApiContrller');
+const empresasApiController = require('../../controllers/api/EmpresasApiController');
 const { requireDb } = require('../../middleware/auth');
 const { handleUpload, removeUploadedFile } = require('../../middleware/upload');
 const { logosUpload } = require('../../middleware/upload');
