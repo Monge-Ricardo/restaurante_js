@@ -108,6 +108,14 @@ function validarTextoLimpio(texto, minLength, maxLength) {
     return false;
   }
 
+  if (minLength && typeof minLength === 'object') {
+    ({ minLength, maxLength } = minLength);
+  }
+
+  if (!Number.isInteger(minLength) || !Number.isInteger(maxLength)) {
+    return false;
+  }
+
   const limpio = texto.trim();
   if (limpio.length < minLength || limpio.length > maxLength) {
     return false;

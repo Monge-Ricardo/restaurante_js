@@ -1,0 +1,19 @@
+# Node.js dependencies
+**/node_modules/
+npm-debug.log*
+
+# Local environment and secrets
+**/.env
+**/.env.*
+!**/.env.example
+
+# Runtime logs
+*.log
+
+# Generated test and build output
+**/coverage/
+**/dist/
+
+# Operating system files
+.DS_Store
+Thumbs.db

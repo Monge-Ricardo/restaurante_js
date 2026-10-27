@@ -48,6 +48,12 @@ test('validarTextoLimpio limita longitud y caracteres', () => {
   assert.equal(validarTextoLimpio('Precio $5', 3, 50), false);
 });
 
+test('validarTextoLimpio acepta el formato de opciones usado por los modelos', () => {
+  assert.equal(validarTextoLimpio('Postres', { minLength: 2, maxLength: 50 }), true);
+  assert.equal(validarTextoLimpio('A', { minLength: 2, maxLength: 50 }), false);
+  assert.equal(validarTextoLimpio('Postres', { minLength: 2 }), false);
+});
+
 test('validarNumeroPositivo exige un número mayor que cero', () => {
   assert.equal(validarNumeroPositivo(0.01), true);
   assert.equal(validarNumeroPositivo('2.5'), true);
