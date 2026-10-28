@@ -33,12 +33,28 @@ async function listarPlatos(req, res, next) {
       data: docs.map(mapPlato)
     });
   } catch (error) {
+    // Errores de conexión / timeout con la base de datos
+    if (error.name === 'MongoNetworkError' || error.name === 'MongoServerSelectionError') {
+      return res.status(503).json({
+        success: false,
+        message: 'Servicio no disponible. No se pudo conectar a la base de datos.'
+      });
+    }
+
+    // Error de timeout en la consulta
+    if (error.name === 'MongoServerError' && error.code === 50) {
+      return res.status(504).json({
+        success: false,
+        message: 'La consulta tardó demasiado tiempo. Intente de nuevo.'
+      });
+    }
+
+    // Cualquier otro error inesperado
+    console.error('Error en listarPlatos:', error);
     return res.status(500).json({
       success: false,
-      //Especificar mas el error y ver que tipo de error es ya que el 500 es muy general
-      message: 'Error al obtener los platos.'
+      message: 'Error interno del servidor al obtener los platos.'
     });
-    return next(error);
   }
 }
 
@@ -62,11 +78,25 @@ async function obtenerPlatoPorId(req, res, next) {
       data: mapPlato(doc)
     });
   } catch (error) {
+    if (error.name === 'MongoNetworkError' || error.name === 'MongoServerSelectionError') {
+      return res.status(503).json({
+        success: false,
+        message: 'Servicio no disponible. No se pudo conectar a la base de datos.'
+      });
+    }
+
+    if (error.name === 'MongoServerError' && error.code === 50) {
+      return res.status(504).json({
+        success: false,
+        message: 'La consulta tardó demasiado tiempo. Intente de nuevo.'
+      });
+    }
+
+    console.error('Error en obtenerPlatoPorId:', error);
     return res.status(500).json({
       success: false,
-      message: 'Error al obtener el plato.'
+      message: 'Error interno del servidor al obtener el plato.'
     });
-    return next(error);
   }
 }
 
