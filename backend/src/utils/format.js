@@ -49,7 +49,7 @@ function formatMoney(value) {
 
 function parseDecimal(texto) {
   if (texto === null || texto === undefined) return 0;
-  const limpio = String(texto).trim().replace(/,/g, '.');
+  const limpio = String(texto).trim().replaceAll(/,/g, '.');
   if (limpio === '') return 0;
 
   const numero = Number.parseFloat(limpio);
