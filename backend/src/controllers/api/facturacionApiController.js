@@ -15,16 +15,16 @@ function serializarFactura(documento) {
   return Factura.fromDatabase(documento).toJSON();
 }
 
-function leerId(valor, campo) {
+function leerId(valor, campo, apiCode) {
   if (typeof valor !== 'string' || !valor.trim()) {
-    throw createHttpError(400, `El campo ${campo} es obligatorio.`);
+    throw createHttpError(400, `El campo ${campo} es obligatorio.`, apiCode);
   }
   return valor.trim();
 }
 
-function leerFecha(valor, campo, esHasta = false) {
+function leerFecha(valor, campo, apiCode, esHasta = false) {
   if (typeof valor !== 'string' || !valor.trim()) {
-    throw createHttpError(400, `El filtro ${campo} debe ser una fecha válida.`);
+    throw createHttpError(400, `El filtro ${campo} debe ser una fecha válida.`, apiCode);
   }
 
   const texto = valor.trim();
@@ -35,7 +35,7 @@ function leerFecha(valor, campo, esHasta = false) {
     Number.isNaN(fecha.getTime()) ||
     (soloFecha && fecha.toISOString().slice(0, 10) !== texto)
   ) {
-    throw createHttpError(400, `El filtro ${campo} debe ser una fecha válida.`);
+    throw createHttpError(400, `El filtro ${campo} debe ser una fecha válida.`, apiCode);
   }
 
   if (soloFecha && esHasta) {
@@ -49,8 +49,12 @@ function leerFecha(valor, campo, esHasta = false) {
 function construirFiltroFechas(query) {
   const desdeTexto = query.desde;
   const hastaTexto = query.hasta;
-  const desde = desdeTexto === undefined ? null : leerFecha(desdeTexto, 'desde');
-  const hasta = hastaTexto === undefined ? null : leerFecha(hastaTexto, 'hasta', true);
+  const desde =
+    desdeTexto === undefined ? null : leerFecha(desdeTexto, 'desde', 'FECHA_DESDE_INVALIDA');
+  const hasta =
+    hastaTexto === undefined
+      ? null
+      : leerFecha(hastaTexto, 'hasta', 'FECHA_HASTA_INVALIDA', true);
 
   if (
     desde &&
@@ -58,7 +62,11 @@ function construirFiltroFechas(query) {
     (desde.fecha > hasta.fecha ||
       (desde.fecha.getTime() === hasta.fecha.getTime() && hasta.exclusivo))
   ) {
-    throw createHttpError(400, 'El filtro desde no puede ser posterior al filtro hasta.');
+    throw createHttpError(
+      400,
+      'El filtro desde no puede ser posterior al filtro hasta.',
+      'RANGO_FECHAS_INVALIDO'
+    );
   }
 
   if (!desde && !hasta) return {};
@@ -112,7 +120,7 @@ async function listar(req, res) {
 async function detalle(req, res) {
   const documento = await req.app.locals.context.facturas.findOne({ _id: req.params.id });
   if (!documento) {
-    throw createHttpError(404, 'La factura solicitada no existe.');
+    throw createHttpError(404, 'La factura solicitada no existe.', 'FACTURA_NO_ENCONTRADA');
   }
 
   return res.json({ success: true, data: serializarFactura(documento) });
@@ -120,22 +128,34 @@ async function detalle(req, res) {
 
 async function emitir(req, res) {
   const body = req.body && typeof req.body === 'object' ? req.body : {};
-  const idCliente = leerId(body.idCliente, 'idCliente');
-  const idEmpresa = leerId(body.idEmpresa, 'idEmpresa');
-  const idEmpleado = leerId(body.idEmpleado, 'idEmpleado');
+  const idCliente = leerId(body.idCliente, 'idCliente', 'ID_CLIENTE_REQUERIDO');
+  const idEmpresa = leerId(body.idEmpresa, 'idEmpresa', 'ID_EMPRESA_REQUERIDO');
+  const idEmpleado = leerId(body.idEmpleado, 'idEmpleado', 'ID_EMPLEADO_REQUERIDO');
 
   if (!Array.isArray(body.detalles) || body.detalles.length === 0) {
-    throw createHttpError(400, 'Debes enviar al menos un detalle de factura.');
+    throw createHttpError(
+      400,
+      'Debes enviar al menos un detalle de factura.',
+      'DETALLES_REQUERIDOS'
+    );
   }
 
   const detallesSolicitados = body.detalles.map((detalle, indice) => {
     if (!detalle || typeof detalle !== 'object' || Array.isArray(detalle)) {
-      throw createHttpError(400, `El detalle ${indice + 1} no es válido.`);
+      throw createHttpError(400, `El detalle ${indice + 1} no es válido.`, 'DETALLE_INVALIDO');
     }
 
-    const idPlato = leerId(detalle.idPlato, `detalles[${indice}].idPlato`);
+    const idPlato = leerId(
+      detalle.idPlato,
+      `detalles[${indice}].idPlato`,
+      'ID_PLATO_REQUERIDO'
+    );
     if (!Number.isSafeInteger(detalle.cantidad) || detalle.cantidad <= 0) {
-      throw createHttpError(400, `La cantidad del detalle ${indice + 1} debe ser un entero positivo.`);
+      throw createHttpError(
+        400,
+        `La cantidad del detalle ${indice + 1} debe ser un entero positivo.`,
+        'CANTIDAD_INVALIDA'
+      );
     }
 
     return { idPlato, cantidad: detalle.cantidad };
@@ -148,9 +168,15 @@ async function emitir(req, res) {
     context.empleados.findOne({ _id: idEmpleado })
   ]);
 
-  if (!clienteDoc) throw createHttpError(404, `El cliente ${idCliente} no existe.`);
-  if (!empresaDoc) throw createHttpError(404, `La empresa ${idEmpresa} no existe.`);
-  if (!empleadoDoc) throw createHttpError(404, `El empleado ${idEmpleado} no existe.`);
+  if (!clienteDoc) {
+    throw createHttpError(404, `El cliente ${idCliente} no existe.`, 'CLIENTE_NO_ENCONTRADO');
+  }
+  if (!empresaDoc) {
+    throw createHttpError(404, `La empresa ${idEmpresa} no existe.`, 'EMPRESA_NO_ENCONTRADA');
+  }
+  if (!empleadoDoc) {
+    throw createHttpError(404, `El empleado ${idEmpleado} no existe.`, 'EMPLEADO_NO_ENCONTRADO');
+  }
 
   const platosDocs = await Promise.all(
     detallesSolicitados.map(({ idPlato }) => context.platos.findOne({ _id: idPlato }))
@@ -158,11 +184,17 @@ async function emitir(req, res) {
 
   const lineas = detallesSolicitados.map((detalle, indice) => {
     const platoDoc = platosDocs[indice];
-    if (!platoDoc) throw createHttpError(404, `El plato ${detalle.idPlato} no existe.`);
+    if (!platoDoc) {
+      throw createHttpError(404, `El plato ${detalle.idPlato} no existe.`, 'PLATO_NO_ENCONTRADO');
+    }
 
     const plato = mapPlato(platoDoc);
     if (!Number.isFinite(plato.precio) || plato.precio < 0) {
-      throw createHttpError(422, `El plato ${detalle.idPlato} tiene un precio inválido.`);
+      throw createHttpError(
+        422,
+        `El plato ${detalle.idPlato} tiene un precio inválido.`,
+        'PRECIO_PLATO_INVALIDO'
+      );
     }
 
     return {
@@ -230,7 +262,11 @@ async function emitir(req, res) {
 
   const validacion = factura.validar();
   if (!validacion.esValido) {
-    throw createHttpError(400, 'La factura calculada no cumple las reglas del modelo.');
+    throw createHttpError(
+      400,
+      'La factura calculada no cumple las reglas del modelo.',
+      'FACTURA_INVALIDA'
+    );
   }
 
   for (let intento = 0; ; intento += 1) {
@@ -258,7 +294,7 @@ async function anular(req, res) {
   );
 
   if (resultado.matchedCount === 0) {
-    throw createHttpError(404, 'La factura solicitada no existe.');
+    throw createHttpError(404, 'La factura solicitada no existe.', 'FACTURA_NO_ENCONTRADA');
   }
 
   const documento = await context.facturas.findOne({ _id: id });

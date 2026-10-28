@@ -33,7 +33,11 @@ function requireAuth(req, res, next) {
   }
 
   if (isJsonRequest(req)) {
-    return res.status(401).json({ encontrado: false, error: 'No autenticado.' });
+    return res.status(401).json({
+      encontrado: false,
+      code: 'AUTENTICACION_REQUERIDA',
+      error: 'No autenticado.'
+    });
   }
 
   return res.redirect('/Account/Login');
@@ -55,7 +59,11 @@ function requirePermiso(permiso) {
     }
 
     if (isJsonRequest(req)) {
-      return res.status(403).json({ encontrado: false, error: 'No tiene permiso para acceder a este recurso.' });
+      return res.status(403).json({
+        encontrado: false,
+        code: 'PERMISO_INSUFICIENTE',
+        error: 'No tiene permiso para acceder a este recurso.'
+      });
     }
 
     const error = new Error('No tiene permiso para acceder a este recurso.');
@@ -72,6 +80,7 @@ function requireDb(req, res, next) {
     );
     error.status = 503;
     error.expose = true;
+    error.apiCode = 'BASE_DATOS_NO_DISPONIBLE';
     return next(error);
   }
 

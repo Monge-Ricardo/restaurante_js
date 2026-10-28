@@ -10,10 +10,11 @@ function asyncHandler(handler) {
   };
 }
 
-function createHttpError(status, message) {
+function createHttpError(status, message, apiCode) {
   const error = new Error(message);
   error.status = status;
   error.expose = true;
+  if (apiCode) error.apiCode = apiCode;
   return error;
 }
 
