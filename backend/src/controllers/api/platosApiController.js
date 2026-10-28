@@ -1,5 +1,9 @@
 'use strict';
 
+
+
+
+const Plato = require('../../models/Plato');
 const { mapPlato, mapCategoria } = require('../../utils/documents');
 const { parseDecimal, toDecimal128 } = require('../../utils/format');
 const { validarNumeroPositivo } = require('../../utils/validaciones');
@@ -29,6 +33,11 @@ async function listarPlatos(req, res, next) {
       data: docs.map(mapPlato)
     });
   } catch (error) {
+    return res.status(500).json({
+      success: false,
+      //Especificar mas el error y ver que tipo de error es ya que el 500 es muy general
+      message: 'Error al obtener los platos.'
+    });
     return next(error);
   }
 }
@@ -53,6 +62,10 @@ async function obtenerPlatoPorId(req, res, next) {
       data: mapPlato(doc)
     });
   } catch (error) {
+    return res.status(500).json({
+      success: false,
+      message: 'Error al obtener el plato.'
+    });
     return next(error);
   }
 }
