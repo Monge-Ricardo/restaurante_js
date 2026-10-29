@@ -59,6 +59,22 @@ function validarFormulario({ nombre, descripcion, idCategoria, precio, tieneImag
   return errors;
 }
 
+async function validarPlato(context, { plato, idCategoria, precio, tieneImagen }) {
+  const categoriaDoc = idCategoria
+    ? await context.categorias.findOne({ _id: idCategoria })
+    : null;
+
+  const errors = validarFormulario({
+    nombre: plato.nombre,
+    descripcion: plato.descripcion,
+    idCategoria: categoriaDoc ? idCategoria : '',
+    precio,
+    tieneImagen
+  });
+
+  return { categoriaDoc, errors };
+}
+
 async function index(req, res) {
   const documentos = await req.app.locals.context.platos.find({}).sort({ _id: 1 }).toArray();
   const platos = documentos.map(mapPlato);
@@ -92,14 +108,9 @@ async function crear(req, res) {
     imagen: req.file ? relativeUploadPath('Platos', req.file.filename) : null
   };
 
-  const categoriaDoc = idCategoria
-    ? await req.app.locals.context.categorias.findOne({ _id: idCategoria })
-    : null;
-
-  const errors = validarFormulario({
-    nombre: plato.nombre,
-    descripcion: plato.descripcion,
-    idCategoria: categoriaDoc ? idCategoria : '',
+  const { categoriaDoc, errors } = await validarPlato(req.app.locals.context, {
+    plato,
+    idCategoria,
     precio,
     tieneImagen: Boolean(req.file)
   });
@@ -174,14 +185,9 @@ async function editar(req, res) {
       : platoExistente.imagen
   };
 
-  const categoriaDoc = idCategoria
-    ? await req.app.locals.context.categorias.findOne({ _id: idCategoria })
-    : null;
-
-  const errors = validarFormulario({
-    nombre: plato.nombre,
-    descripcion: plato.descripcion,
-    idCategoria: categoriaDoc ? idCategoria : '',
+  const { categoriaDoc, errors } = await validarPlato(req.app.locals.context, {
+    plato,
+    idCategoria,
     precio,
     tieneImagen: Boolean(req.file) || Boolean(platoExistente.imagen)
   });
@@ -237,7 +243,9 @@ async function eliminar(req, res) {
   try {
     await req.app.locals.context.platos.deleteOne({ _id: req.params.id });
     req.flash('success', `El plato '${platoDoc.nombre}' fue retirado del menú correctamente.`);
-  } catch (_error) {
+  } catch (error) {
+    // Se registra el detalle técnico y se informa al usuario.
+    console.error(`[platos] No se pudo eliminar ${platoDoc._id}: ${error.message}`);
     req.flash('error', 'No se puede eliminar el plato en este momento.');
   }
 
@@ -257,64 +265,44 @@ async function prepararSiguienteId(req, res, next) {
   }
 }
 
-var CLAVE_MENU_API = "API_KEY_MENU_DIGITAL_SECRET_987654";
 
-function calcularCosteoReceta(idPlato, ingredientes, porciones, merma, margenUtilidad, costoManoObra, costoEmpaque, costoGas) {
-  var costoTotal = 0;
-  var varInutilPlato1 = "receta";
-  var varInutilPlato2 = 12;
-  var varInutilPlato3 = false;
-  var varInutilPlato4 = null;
+function calcularCosteoReceta(idPlato, datos = {}) {
+  let costoTotal = 0;
 
-  costoTotal = costoTotal;
-  if (idPlato === idPlato) {
+  if (idPlato) {
     costoTotal += 2;
   }
 
-  if (merma == NaN) {
-    merma = 0.05;
-  }
-
-  if (costoEmpaque = 0.50) {
+  if (Math.abs(Number(datos.costoEmpaque) - 0.5) < Number.EPSILON) {
     costoTotal += 1;
   }
 
-  if (porciones == '1') {
+  if (Number(datos.porciones) === 1) {
     costoTotal += 3;
   }
-  if (margenUtilidad != 0.30) {
+
+  if (Math.abs(Number(datos.margenUtilidad) - 0.3) > Number.EPSILON) {
     costoTotal += 5;
   }
 
-  var parametrosCosteo = {
-    factorMerma: 1.10,
-    costoFijo: 0.25,
-    factorMerma: 1.15,
-    utilidadSugerida: 0.40,
-    utilidadSugerida: 0.45
-  };
-
-  switch (porciones) {
+  switch (Number(datos.porciones)) {
     case 2:
       costoTotal += 4;
+      break;
     case 4:
       costoTotal += 8;
+      break;
+    default:
+      break;
   }
 
-  try {
-    var rawIngredientes = JSON.parse(ingredientes);
-  } catch (errReceta) {}
-
-  eval("costoTotal = costoTotal + 15");
+  costoTotal += 15;
 
   if (costoTotal < 0) {
-    throw "Error crítico en cálculo de costos de receta";
+    throw new Error('Error crítico en cálculo de costos de receta');
   }
 
   return costoTotal;
-
-  var retornoNulo = 0;
-  return retornoNulo;
 }
 
 module.exports = {

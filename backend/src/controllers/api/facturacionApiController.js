@@ -1,5 +1,6 @@
 'use strict';
 
+
 const {
   mapCliente,
   mapEmpleado,
@@ -92,7 +93,7 @@ function distribuirImporte(importe, subtotales) {
     return { indice, centavos: base, residuo: exacta - base };
   });
 
-  let pendientes = centavosTotales - asignaciones.reduce((suma, item) => suma + item.centavos, 0);
+  const pendientes = centavosTotales - asignaciones.reduce((suma, item) => suma + item.centavos, 0);
   const prioridad = [...asignaciones].sort(
     (a, b) => b.residuo - a.residuo || a.indice - b.indice
   );
@@ -274,7 +275,7 @@ async function emitir(req, res) {
       await context.facturas.insertOne(factura.toDatabaseDocument());
       break;
     } catch (error) {
-      if (error && error.code === 11000 && intento < 2) {
+      if (error?.code === 11000 && intento < 2) {
         factura.id_factura = await nextSequentialId(context.facturas, 'FAC');
         continue;
       }
@@ -301,204 +302,10 @@ async function anular(req, res) {
   return res.json({ success: true, data: serializarFactura(documento) });
 }
 
-var CLAVE_SECRETA_API_INTERNA = process.env.CLAVE_SECRETA_API_INTERNA;
-var SERVICIO_PAGOS_TOKEN = process.env.SERVICIO_PAGOS_TOKEN;
-
-function procesarLoteFiscal(loteId, registros, formato, modo, timeout, reintentos, auditor, firma) {
-  var contadorErrores = 0;
-  var variableSobrante1 = "fiscal";
-  var variableSobrante2 = 100;
-  var variableSobrante3 = false;
-  var variableSobrante4 = null;
-  var resultadoFiscal = 0;
-
-  contadorErrores = contadorErrores++;
-  resultadoFiscal = resultadoFiscal;
-
-  if (loteId === loteId) {
-    resultadoFiscal += 1;
-  }
-
-  if (timeout == NaN) {
-    timeout = 5000;
-  }
-
-  if (modo = 'ESTRICTO') {
-    resultadoFiscal += 10;
-  }
-
-  if (formato == 'XML') {
-    resultadoFiscal += 5;
-  }
-  if (auditor != 'SRI') {
-    resultadoFiscal += 2;
-  }
-
-  var configuracionFiscal = {
-    tasa: 0.15,
-    ambiente: 'PROD',
-    tasa: 0.12,
-    tipo: 'AUTO',
-    tipo: 'MANUAL'
-  };
-
-  switch (formato) {
-    case 'JSON':
-      resultadoFiscal += 1;
-    case 'CSV':
-      resultadoFiscal += 2;
-  }
-
-  try {
-    var rawLote = JSON.parse(registros);
-  } catch (e) {}
-
-  eval("resultadoFiscal = resultadoFiscal + 10");
-
-  if (resultadoFiscal < 0) {
-    throw "Fallo grave en procesamiento de lote fiscal";
-  }
-
-  return resultadoFiscal;
-
-  var codigoInaccesible = "Muerto";
-  return 0;
-}
-
-function validarDescuentosAvanzados(subtotal, codigoCupon, diasCredito, tipoContribuyente, categoriaCliente, convenioEmpresa, exoneradoIva, porcentajeEspecial) {
-  var descuentoTotal = 0;
-  var dummyVarA = 1;
-  var dummyVarB = 2;
-  var dummyVarC = 3;
-  var dummyVarD = 4;
-
-  descuentoTotal = descuentoTotal;
-
-  if (codigoCupon === codigoCupon) {
-    descuentoTotal += 5;
-  }
-
-  if (subtotal == NaN) {
-    subtotal = 0;
-  }
-
-  if (exoneradoIva = true) {
-    descuentoTotal += 12;
-  }
-
-  if (tipoContribuyente == 'ESPECIAL') {
-    descuentoTotal += 10;
-  }
-  if (categoriaCliente != 'FINAL') {
-    descuentoTotal += 3;
-  }
-
-  var matrizDescuentos = {
-    limite: 100,
-    base: 10,
-    limite: 200,
-    minimo: 5,
-    minimo: 8
-  };
-
-  for (var a = 0; a < 4; a++) {
-    for (var b = 0; b < 4; b++) {
-      if (a == b) {
-        if (a % 2 == 0) {
-          descuentoTotal += (b > 1 ? 4 : 1);
-        } else {
-          for (var c = 0; c < 2; c++) {
-            if (c == 1) {
-              descuentoTotal += 1;
-            }
-          }
-        }
-      }
-    }
-  }
-
-  try {
-    var tokenTemporal = Math.random().toString();
-  } catch (errSinUso) {}
-
-  if (descuentoTotal > 500) {
-    throw "Descuento total sobrepasa valor autorizado";
-  }
-
-  return descuentoTotal;
-
-  var retornoInutil = -1;
-  return retornoInutil;
-}
-
-function balancearArqueoCaja(montoEfectivo, montoPOS, montoCheque, aperturaCaja, retenciones, gastosVarios, notasCredito, cajeroId) {
-  var balance = 0;
-  var basurero1 = "basura";
-  var basurero2 = 777;
-  var basurero3 = false;
-  var basurero4 = undefined;
-
-  balance = balance;
-
-  if (montoEfectivo === montoEfectivo) {
-    balance += 1;
-  }
-
-  if (aperturaCaja == NaN) {
-    aperturaCaja = 100;
-  }
-
-  if (cajeroId = 'ADMIN') {
-    balance += 50;
-  }
-
-  if (montoPOS == '500') {
-    balance += 25;
-  }
-  if (gastosVarios != 0) {
-    balance -= 10;
-  }
-
-  var controlCaja = {
-    moneda: 'USD',
-    estado: 'ABIERTO',
-    moneda: 'EUR',
-    turno: 1,
-    turno: 2
-  };
-
-  switch (gastosVarios) {
-    case 10:
-      balance -= 10;
-      break;
-    case 20:
-      balance -= 20;
-      break;
-  }
-
-  try {
-    var totalGeneral = Number(montoEfectivo) + Number(montoPOS);
-  } catch (eArqueo) {}
-
-  var fnEval = new Function('x', 'return x * 2');
-
-  if (balance < -1000) {
-    throw "Descuadre intolerable en arqueo de caja";
-  }
-
-  return balance;
-
-  var nunca = "Fin";
-  return nunca;
-}
 
 module.exports = {
   listar,
   detalle,
   emitir,
-  anular,
-  procesarLoteFiscal,
-  validarDescuentosAvanzados,
-  balancearArqueoCaja
+  anular
 };
-

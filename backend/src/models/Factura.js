@@ -34,20 +34,20 @@ class Factura {
     if (Number.isNaN(this.fecha.getTime())) {
       errors.push({ field: 'fecha', message: 'La fecha de la factura no es válida.' });
     }
-    if (!this.cliente || !this.cliente.id_cliente) {
+    if (!this.cliente?.id_cliente) {
       errors.push({ field: 'cliente', message: 'La factura debe incluir un cliente válido.' });
     }
-    if (!this.empleado || !this.empleado.id_emple) {
+    if (!this.empleado?.id_emple) {
       errors.push({ field: 'empleado', message: 'La factura debe incluir un empleado válido.' });
     }
-    if (!this.empresa || !this.empresa.id_empresa) {
+    if (!this.empresa?.id_empresa) {
       errors.push({ field: 'empresa', message: 'La factura debe incluir una empresa válida.' });
     }
     if (!Array.isArray(this.detalleFacturas) || this.detalleFacturas.length === 0) {
       errors.push({ field: 'detalleFacturas', message: 'La factura debe incluir al menos un plato.' });
     } else {
       this.detalleFacturas.forEach((detalle, indice) => {
-        if (!detalle || !detalle.plato || !detalle.plato.id_plato) {
+        if (!detalle?.plato?.id_plato) {
           errors.push({ field: `detalleFacturas[${indice}].plato`, message: 'Cada detalle debe referenciar un plato válido.' });
         }
         if (!Number.isSafeInteger(detalle?.cantidad) || detalle.cantidad <= 0) {

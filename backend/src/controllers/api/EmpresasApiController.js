@@ -2,7 +2,7 @@
 
 const Empresa = require('../../models/Empresa');
 const { mapEmpresa } = require('../../utils/documents');
-const { validarRuc } = require('../../utils/validaciones');
+const { validarDatosEmpresa } = require('../../utils/empresas');
 const { createHttpError } = require('../../utils/http');
 const { nextSequentialId } = require('../../utils/ids');
 const {
@@ -10,28 +10,38 @@ const {
   removeUploadedFile
 } = require('../../middleware/upload');
 
-function buildErrors({ ruc, nombre, tieneLogo, currentLogo = null }) {
-  const errors = [];
+function obtenerContexto(req) {
+  const context = req.app.locals.context;
+  if (!context) throw createHttpError(500, 'Contexto de base de datos no disponible.');
+  return context;
+}
 
-  if (!String(nombre || '').trim()) {
-    errors.push({ field: 'nombre', message: 'El nombre comercial es obligatorio.' });
+async function obtenerEmpresa(context, id) {
+  const empresaDoc = await context.empresas.findOne({ _id: id });
+  if (!empresaDoc) throw createHttpError(404, 'La empresa solicitada no existe.');
+  return empresaDoc;
+}
+
+function respuestaRucDuplicado(res, mensaje) {
+  return res.status(409).json({
+    success: false,
+    errors: [{ field: 'ruc', message: mensaje }]
+  });
+}
+
+async function manejarErrorEmpresa(error, req, res, next, mensajeDuplicado) {
+  await removeUploadedFile(req.file);
+
+  if (error?.code === 11000) {
+    return respuestaRucDuplicado(res, mensajeDuplicado);
   }
 
-  if (!validarRuc(String(ruc || '').trim())) {
-    errors.push({ field: 'ruc', message: 'El RUC ingresado no es válido.' });
-  }
-
-  if (!tieneLogo && !currentLogo) {
-    errors.push({ field: 'logo', message: 'Debe seleccionar un archivo de logo.' });
-  }
-
-  return errors;
+  return next(error);
 }
 
 async function list(req, res, next) {
   try {
-    const context = req.app.locals.context;
-    if (!context) throw createHttpError(500, 'Contexto de base de datos no disponible.');
+    const context = obtenerContexto(req);
 
     const documentos = await context.empresas
       .find({})
@@ -46,11 +56,9 @@ async function list(req, res, next) {
 
 async function getById(req, res, next) {
   try {
-    const context = req.app.locals.context;
-    if (!context) throw createHttpError(500, 'Contexto de base de datos no disponible.');
+    const context = obtenerContexto(req);
 
-    const empresaDoc = await context.empresas.findOne({ _id: req.params.id });
-    if (!empresaDoc) throw createHttpError(404, 'La empresa solicitada no existe.');
+    const empresaDoc = await obtenerEmpresa(context, req.params.id);
 
     return res.json({ success: true, data: mapEmpresa(empresaDoc) });
   } catch (error) {
@@ -60,15 +68,14 @@ async function getById(req, res, next) {
 
 async function create(req, res, next) {
   try {
-    const context = req.app.locals.context;
-    if (!context) throw createHttpError(500, 'Contexto de base de datos no disponible.');
+    const context = obtenerContexto(req);
 
     const empresaBody = {
       ruc: String(req.body.ruc || '').trim(),
       nombre: String(req.body.nombre || '').trim()
     };
 
-    const errors = buildErrors({ ...empresaBody, tieneLogo: Boolean(req.file) });
+    const errors = validarDatosEmpresa({ ...empresaBody, tieneLogo: Boolean(req.file) });
     if (errors.length > 0) {
       await removeUploadedFile(req.file);
       return res.status(400).json({ success: false, errors });
@@ -82,21 +89,19 @@ async function create(req, res, next) {
 
     return res.status(201).json({ success: true, data: mapEmpresa(empresa.toDocument()) });
   } catch (error) {
-    await removeUploadedFile(req.file);
-    if (error && error.code === 11000) {
-      return res.status(409).json({
-        success: false,
-        errors: [{ field: 'ruc', message: 'Ya existe una empresa registrada con ese RUC.' }]
-      });
-    }
-    return next(error);
+    return manejarErrorEmpresa(
+      error,
+      req,
+      res,
+      next,
+      'Ya existe una empresa registrada con ese RUC.'
+    );
   }
 }
 
 async function update(req, res, next) {
   try {
-    const context = req.app.locals.context;
-    if (!context) throw createHttpError(500, 'Contexto de base de datos no disponible.');
+    const context = obtenerContexto(req);
 
     const id = req.params.id;
     if (req.body.id_empresa && req.body.id_empresa !== id) {
@@ -115,7 +120,7 @@ async function update(req, res, next) {
       nombre: String(req.body.nombre || '').trim()
     };
 
-    const errors = buildErrors({
+    const errors = validarDatosEmpresa({
       ...empresaBody,
       tieneLogo: Boolean(req.file),
       currentLogo: logoAnterior
@@ -135,24 +140,21 @@ async function update(req, res, next) {
 
     return res.json({ success: true, data: mapEmpresa(empresa.toDocument()) });
   } catch (error) {
-    await removeUploadedFile(req.file);
-    if (error && error.code === 11000) {
-      return res.status(409).json({
-        success: false,
-        errors: [{ field: 'ruc', message: 'Ya existe otra empresa registrada con ese RUC.' }]
-      });
-    }
-    return next(error);
+    return manejarErrorEmpresa(
+      error,
+      req,
+      res,
+      next,
+      'Ya existe otra empresa registrada con ese RUC.'
+    );
   }
 }
 
 async function remove(req, res, next) {
   try {
-    const context = req.app.locals.context;
-    if (!context) throw createHttpError(500, 'Contexto de base de datos no disponible.');
+    const context = obtenerContexto(req);
 
-    const empresaDoc = await context.empresas.findOne({ _id: req.params.id });
-    if (!empresaDoc) throw createHttpError(404, 'La empresa solicitada no existe.');
+    const empresaDoc = await obtenerEmpresa(context, req.params.id);
 
     await context.empresas.deleteOne({ _id: req.params.id });
     return res.json({ success: true, data: { id: empresaDoc._id } });
@@ -161,32 +163,27 @@ async function remove(req, res, next) {
   }
 }
 
-const CLAVE_SRI_WEBSERVICE = 'SRI_PRODUCCION_PRIVATE_KEY_5544332211';
 
-function consultarValidezRucSRI(ruc, estado, tipo, razon, representante, fechaInicio, obligado, agenteRetencion) {
+function consultarValidezRucSRI(ruc, datos = {}) {
   let validezRuc = 0;
 
   if (ruc) {
     validezRuc += 1;
   }
 
-  if (Number.isNaN(Number(obligado))) {
-    obligado = 1;
-  }
-
-  if (agenteRetencion === true) {
+  if (datos.agenteRetencion === true) {
     validezRuc += 10;
   }
 
-  if (estado === 'ACTIVO') {
+  if (datos.estado === 'ACTIVO') {
     validezRuc += 20;
   }
 
-  if (tipo !== 'JURIDICO') {
+  if (datos.tipo !== 'JURIDICO') {
     validezRuc += 5;
   }
 
-  switch (tipo) {
+  switch (datos.tipo) {
     case 'SOCIEDAD':
       validezRuc += 15;
       break;

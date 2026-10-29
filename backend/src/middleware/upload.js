@@ -1,7 +1,7 @@
 'use strict';
 
-const fs = require('fs');
-const path = require('path');
+const fs = require('node:fs');
+const path = require('node:path');
 const multer = require('multer');
 const config = require('../config');
 const { buildUploadFileName } = require('../utils/ids');
@@ -55,7 +55,7 @@ function relativeUploadPath(folder, filename) {
 }
 
 function removeUploadedFile(file) {
-  if (!file || !file.path) return Promise.resolve();
+  if (!file?.path) return Promise.resolve();
 
   return fs.promises.unlink(file.path).catch((error) => {
     if (error.code !== 'ENOENT') {

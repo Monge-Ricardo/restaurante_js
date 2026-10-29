@@ -14,7 +14,11 @@ module.exports = [
     },
     rules: {
       'no-unused-vars': ['warn', { argsIgnorePattern: '^(req|res|next|_)' }],
-      'no-console': 'off'
+      'no-console': 'off',
+      'semi': ['error', 'always'],
+      'quotes': ['error', 'single'],
+      'no-var': 'error',
+      'prefer-const': 'warn'
     }
   },
   {

@@ -1,6 +1,6 @@
 'use strict';
 
-const crypto = require('crypto');
+const crypto = require('node:crypto');
 
 const METODOS_SEGUROS = new Set(['GET', 'HEAD', 'OPTIONS']);
 
@@ -30,8 +30,8 @@ function verifyCsrfToken(req, res, next) {
     return next();
   }
 
-  const recibido = (req.body && req.body._csrf) || req.get('x-csrf-token');
-  if (tokensIguales(recibido, req.session && req.session.csrfToken)) {
+  const recibido = req.body?._csrf || req.get('x-csrf-token');
+  if (tokensIguales(recibido, req.session?.csrfToken)) {
     return next();
   }
 

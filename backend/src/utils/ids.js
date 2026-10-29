@@ -1,9 +1,24 @@
 'use strict';
 
-const path = require('path');
+const path = require('node:path');
 
 function escapeRegex(texto) {
-  return String(texto).replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+  return String(texto).replace(/[.*+?^${}()|[\]\\]/g, String.raw`\$&`);
+}
+
+function quitarGuionesBorde(texto) {
+  let inicio = 0;
+  let fin = texto.length;
+
+  while (inicio < fin && texto[inicio] === '_') {
+    inicio += 1;
+  }
+
+  while (fin > inicio && texto[fin - 1] === '_') {
+    fin -= 1;
+  }
+
+  return texto.slice(inicio, fin);
 }
 
 /**
@@ -11,7 +26,7 @@ function escapeRegex(texto) {
  * busca el último _id con el prefijo y suma 1. Ej.: PLA001 -> PLA002.
  */
 async function nextSequentialId(collection, prefix, padding = 3) {
-  const regex = new RegExp(`^${escapeRegex(prefix)}\\d+$`);
+  const regex = new RegExp(String.raw`^${escapeRegex(prefix)}\d+$`);
   const ultimo = await collection
     .find({ _id: { $regex: regex } }, { projection: { _id: 1 } })
     .sort({ _id: -1 })
@@ -36,11 +51,11 @@ function sanitizeFileName(originalName) {
   const nombre = path.basename(String(originalName || ''));
   const extensionOriginal = path.extname(nombre);
   const extension = extensionOriginal.toLowerCase();
-  const base = path
+  const sinCaracteresInvalidos = path
     .basename(nombre, extensionOriginal)
-    .replace(/[^a-zA-Z0-9._-]+/g, '_')
-    .replace(/^_+|_+$/g, '')
-    .slice(0, 80);
+    .replace(/[^a-zA-Z0-9._-]+/g, '_');
+  const sinGuionesBorde = quitarGuionesBorde(sinCaracteresInvalidos);
+  const base = sinGuionesBorde.slice(0, 80);
 
   return {
     base: base || 'archivo',
