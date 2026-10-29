@@ -1,4 +1,4 @@
-'use strict';
+`backend/test/api/plastestjs'use strict';
 
 module.exports = {
   testEnvironment: 'node',
