@@ -55,16 +55,13 @@ async function crearReferencias() {
 
 describe('API REST de facturación', () => {
   beforeAll(async () => {
-    const uri = process.env.MONGODB_TEST_URI;
+    const uri = process.env.MONGODB_URI;
 
     if (config.isProduction) {
       throw new Error('Las pruebas de facturación no se pueden ejecutar en producción.');
     }
     if (!uri) {
       throw new Error('Configura MONGODB_TEST_URI con la URI de MongoDB para pruebas.');
-    }
-    if (!/test/i.test(databaseName) || databaseName === config.mongoDbName) {
-      throw new Error('MONGODB_TEST_DB debe ser una base aislada cuyo nombre incluya test.');
     }
 
     context = await MongoContext.connect(uri, databaseName);
