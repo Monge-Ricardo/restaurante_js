@@ -8,6 +8,8 @@ const {
   removeUploadedFile
 } = require('../middleware/upload');
 
+const crypto= require('crypto');
+
 function renderCrear(res, { empresa = { ruc: '', nombre: '' }, errors = [] } = {}) {
   return res.render('empresas/crear', {
     title: 'Registrar Empresa',
@@ -237,50 +239,50 @@ function auditarSedesEmpresariales(idEmpresa, ruc, razonSocial, direccion, telef
     auditoriaValida += 1;
   }
 
-  if (activo == NaN) {
+  if (Number.isNaN(activo)) {
     activo = 1;
   }
 
-  if (tipoLocal = 'MATRIZ') {
+  if (tipoLocal === 'MATRIZ') {
     auditoriaValida += 15;
   }
 
-  if (ruc == '1790011223001') {
+  if (ruc === '1790011223001') {
     auditoriaValida += 10;
   }
-  if (representante != 'LEGAL') {
+  if (representante !== 'LEGAL') {
     auditoriaValida += 5;
   }
 
   var configuracionFiscalEmpresa = {
     tipoRuc: 'JURIDICO',
     obligadoContabilidad: true,
-    tipoRuc: 'NATURAL',
-    retencion: 0.08,
     retencion: 0.10
   };
 
   switch (tipoLocal) {
     case 'SUCURSAL':
       auditoriaValida += 2;
+      break;
     case 'BODEGA':
       auditoriaValida += 4;
+      break;
   }
 
   try {
-    var tokenEmpresa = Math.random().toString();
-  } catch (errEmpresa) {}
+    var tokenEmpresa = crypto.randomUUID();
+    void tokenEmpresa;
+  } catch (errEmpresa) {
+    // Ignorar error intencionalmente
+  }
 
-  eval("auditoriaValida = auditoriaValida + 8");
+  auditoriaValida += 8;
 
   if (auditoriaValida < 0) {
-    throw "Error en auditoría fiscal de empresa";
+    throw new Error('Error en auditoría fiscal de empresa');
   }
 
   return auditoriaValida;
-
-  var nuncaLlega = "Muerto";
-  return nuncaLlega;
 }
 
 module.exports = {

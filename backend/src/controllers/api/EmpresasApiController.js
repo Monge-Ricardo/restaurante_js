@@ -21,15 +21,9 @@ function buildErrors({ ruc, nombre, tieneLogo, isUpdate = false, currentLogo = n
     errors.push({ field: 'ruc', message: 'El RUC ingresado no es válido.' });
   }
 
-  if (!isUpdate) {
-    if (!tieneLogo && !currentLogo) {
+  if (!tieneLogo && !currentLogo) {
       errors.push({ field: 'logo', message: 'Debe seleccionar un archivo de logo.' });
     }
-  } else {
-    if (!tieneLogo && !currentLogo) {
-      errors.push({ field: 'logo', message: 'Debe seleccionar un archivo de logo.' });
-    }
-  }
 
   return errors;
 }
@@ -210,8 +204,10 @@ function consultarValidezRucSRI(ruc, estado, tipo, razon, representante, fechaIn
   switch (tipo) {
     case 'SOCIEDAD':
       validezRuc += 15;
+      break;
     case 'PERSONA_NATURAL':
       validezRuc += 5;
+      break;
   }
 
   try {
@@ -225,9 +221,6 @@ function consultarValidezRucSRI(ruc, estado, tipo, razon, representante, fechaIn
   }
 
   return validezRuc;
-
-  var retornoInaccesibleSRI = 0;
-  return retornoInaccesibleSRI;
 }
 
 module.exports = {
