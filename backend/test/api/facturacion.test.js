@@ -61,7 +61,7 @@ describe('API REST de facturación', () => {
       throw new Error('Las pruebas de facturación no se pueden ejecutar en producción.');
     }
     if (!uri) {
-      throw new Error('Configura MONGODB_TEST_URI con la URI de MongoDB para pruebas.');
+      throw new Error('Configura MONGODB_URI con la URI de MongoDB para pruebas.');
     }
 
     context = await MongoContext.connect(uri, databaseName);
