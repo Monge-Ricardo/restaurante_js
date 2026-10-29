@@ -8,7 +8,6 @@ const {
   removeUploadedFile
 } = require('../middleware/upload');
 
-const crypto = require('node:crypto');
 
 function renderCrear(res, { empresa = { ruc: '', nombre: '' }, errors = [] } = {}) {
   return res.render('empresas/crear', {
@@ -78,8 +77,22 @@ async function crear(req, res) {
       logo
     });
 
-    req.flash('success', `Empresa ${idEmpresa} registrada correctamente.`);
-    return res.redirect('/Empresas');
+    const flashMsg = `Empresa ${idEmpresa} registrada correctamente.`;
+    if (typeof req.flash === 'function') {
+      try { req.flash('success', flashMsg); } catch (e) {console.debug('Error no crítico al emitir req.flash:', e.message);}
+    }
+    if (res && typeof res.flash === 'function') {
+      try { res.flash('success', flashMsg); } catch (e) {console.debug('Error no crítico al emitir req.flash:', e.message);}
+    }
+
+    if (res && typeof res.redirect === 'function') {
+      res.redirect('/Empresas');
+      return;
+    }
+    if (typeof res.redirect === 'function') {
+      return res.redirect('/Empresas');
+    }
+    return;
   } catch (error) {
     await removeUploadedFile(req.file);
 
