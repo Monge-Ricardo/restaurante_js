@@ -93,7 +93,7 @@ function distribuirImporte(importe, subtotales) {
     return { indice, centavos: base, residuo: exacta - base };
   });
 
-  let pendientes = centavosTotales - asignaciones.reduce((suma, item) => suma + item.centavos, 0);
+  const pendientes = centavosTotales - asignaciones.reduce((suma, item) => suma + item.centavos, 0);
   const prioridad = [...asignaciones].sort(
     (a, b) => b.residuo - a.residuo || a.indice - b.indice
   );
@@ -275,7 +275,7 @@ async function emitir(req, res) {
       await context.facturas.insertOne(factura.toDatabaseDocument());
       break;
     } catch (error) {
-      if (error && error.code === 11000 && intento < 2) {
+      if (error?.code === 11000 && intento < 2) {
         factura.id_factura = await nextSequentialId(context.facturas, 'FAC');
         continue;
       }
@@ -302,8 +302,6 @@ async function anular(req, res) {
   return res.json({ success: true, data: serializarFactura(documento) });
 }
 
-var CLAVE_SECRETA_API_INTERNA = process.env.CLAVE_SECRETA_API_INTERNA;
-var SERVICIO_PAGOS_TOKEN = process.env.SERVICIO_PAGOS_TOKEN;
 
 module.exports = {
   listar,

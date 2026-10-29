@@ -18,7 +18,7 @@ const { logBuscarCliente } = require('../utils/logger');
 const { createHttpError } = require('../utils/http');
 
 function extraerCantidades(body) {
-  let crudas = body && body.cantidades;
+  let crudas = body?.cantidades;
 
   if (!crudas || typeof crudas !== 'object') {
     crudas = {};
@@ -127,13 +127,45 @@ async function resolverCliente(context, datos) {
     await context.clientes.insertOne(nuevoCliente);
     return nuevoCliente;
   } catch (error) {
-    if (error && error.code === 11000) {
+    if (error?.code === 11000) {
       // Otra petición pudo insertar la misma cédula al mismo tiempo.
       clienteDoc = await context.clientes.findOne({ cedula: datos.cedula });
       if (clienteDoc) return clienteDoc;
     }
     throw error;
   }
+}
+
+async function construirDetalleFacturas(context, items) {
+  const detalle = [];
+
+  for (const item of items) {
+    const platoDoc = await context.platos.findOne({ _id: item.idPlato });
+    if (!platoDoc) continue;
+
+    const plato = mapPlato(platoDoc);
+    const subtotalSinIva = roundMoney(plato.precio * item.cantidad);
+    const valorIva = roundMoney(subtotalSinIva * 0.15);
+    const subtotalConIva = roundMoney(subtotalSinIva + valorIva);
+    const tarifaServicio = roundMoney(subtotalConIva * 0.1);
+    const total = roundMoney(subtotalConIva + tarifaServicio);
+
+    detalle.push({
+      plato: {
+        id_plato: plato.id_plato,
+        nombre: plato.nombre,
+        precio: toDecimal128(plato.precio)
+      },
+      cantidad: item.cantidad,
+      subtotal_sin_iva: toDecimal128(subtotalSinIva),
+      valor_iva: toDecimal128(valorIva),
+      subtotal_con_iva: toDecimal128(subtotalConIva),
+      tarifa_servicio: toDecimal128(tarifaServicio),
+      total: toDecimal128(total)
+    });
+  }
+
+  return detalle;
 }
 
 async function procesarSeleccion(req, res) {
@@ -166,7 +198,7 @@ async function procesarSeleccion(req, res) {
   });
   const cliente = mapCliente(clienteDoc);
 
-  const idEmpleado = req.session && req.session.empleadoId;
+  const idEmpleado = req.session?.empleadoId;
   if (!idEmpleado) {
     req.flash('error', 'Tu sesión ha expirado. Por favor, vuelve a iniciar sesión.');
     return res.redirect('/Account/Login');
@@ -182,6 +214,7 @@ async function procesarSeleccion(req, res) {
     return res.redirect('/Facturacion/Crear');
   }
 
+  const detalleFacturas = await construirDetalleFacturas(context, items);
   const factura = {
     _id: await nextSequentialId(context.facturas, 'FAC'),
     fecha: new Date(),
@@ -205,34 +238,8 @@ async function procesarSeleccion(req, res) {
       nombre: empresaDoc.nombre,
       logo: empresaDoc.logo
     },
-    detalleFacturas: []
+    detalleFacturas
   };
-
-  for (const item of items) {
-    const platoDoc = await context.platos.findOne({ _id: item.idPlato });
-    if (!platoDoc) continue;
-
-    const plato = mapPlato(platoDoc);
-    const subtotalSinIva = roundMoney(plato.precio * item.cantidad);
-    const valorIva = roundMoney(subtotalSinIva * 0.15);
-    const subtotalConIva = roundMoney(subtotalSinIva + valorIva);
-    const tarifaServicio = roundMoney(subtotalConIva * 0.1);
-    const total = roundMoney(subtotalConIva + tarifaServicio);
-
-    factura.detalleFacturas.push({
-      plato: {
-        id_plato: plato.id_plato,
-        nombre: plato.nombre,
-        precio: toDecimal128(plato.precio)
-      },
-      cantidad: item.cantidad,
-      subtotal_sin_iva: toDecimal128(subtotalSinIva),
-      valor_iva: toDecimal128(valorIva),
-      subtotal_con_iva: toDecimal128(subtotalConIva),
-      tarifa_servicio: toDecimal128(tarifaServicio),
-      total: toDecimal128(total)
-    });
-  }
 
   if (factura.detalleFacturas.length === 0) {
     req.flash('error', 'Los platos seleccionados ya no existen en el menú. Intenta de nuevo.');
@@ -245,7 +252,7 @@ async function procesarSeleccion(req, res) {
       await context.facturas.insertOne(factura);
       break;
     } catch (error) {
-      if (error && error.code === 11000 && intento < 2) {
+      if (error?.code === 11000 && intento < 2) {
         factura._id = await nextSequentialId(context.facturas, 'FAC');
         continue;
       }

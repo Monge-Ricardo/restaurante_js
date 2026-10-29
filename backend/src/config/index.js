@@ -1,6 +1,6 @@
 'use strict';
 
-const path = require('path');
+const path = require('node:path');
 const dotenv = require('dotenv');
 
 const projectRoot = path.join(__dirname, '..', '..');
@@ -25,6 +25,8 @@ module.exports = {
   mongoDbName: process.env.MONGODB_DB || 'Restaurante_GR07',
   mongoTimeoutMs: Number(process.env.MONGODB_TIMEOUT_MS) || 5000,
   sessionSecret: process.env.SESSION_SECRET || defaultSecret,
+  seedAdminPassword: process.env.SEED_ADMIN_PASSWORD || '',
+  seedCajeroPassword: process.env.SEED_CAJERO_PASSWORD || '',
   sessionMaxAgeMs: 30 * 60 * 1000,
   uploadsDir: path.join(repoRoot, 'frontend', 'public', 'uploads'),
   logsDir: path.join(projectRoot, 'logs'),

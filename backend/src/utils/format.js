@@ -7,28 +7,33 @@ const { Decimal128 } = require('mongodb');
  * del proyecto C#). Estas funciones normalizan esos valores a Number para las vistas
  * y los vuelven a convertir a Decimal128 antes de escribir en la base.
  */
+function normalizarNumero(parsed) {
+  return Number.isFinite(parsed) ? parsed : 0;
+}
+
+function numeroDesdeObjeto(value) {
+  if (typeof value.toNumber === 'function') {
+    try {
+      return normalizarNumero(value.toNumber());
+    } catch (_error) {
+      // Continúa con toString().
+    }
+  }
+
+  return normalizarNumero(Number(value.toString()));
+}
+
 function toNumber(value) {
   if (value === null || value === undefined) return 0;
-  if (typeof value === 'number') return Number.isFinite(value) ? value : 0;
+  if (typeof value === 'number') return normalizarNumero(value);
   if (typeof value === 'bigint') return Number(value);
 
   if (typeof value === 'string') {
-    const parsed = Number(value.trim());
-    return Number.isFinite(parsed) ? parsed : 0;
+    return normalizarNumero(Number(value.trim()));
   }
 
   if (typeof value === 'object') {
-    if (typeof value.toNumber === 'function') {
-      try {
-        const parsed = value.toNumber();
-        return Number.isFinite(parsed) ? parsed : 0;
-      } catch (_error) {
-        // Continúa con toString().
-      }
-    }
-
-    const parsed = Number(value.toString());
-    return Number.isFinite(parsed) ? parsed : 0;
+    return numeroDesdeObjeto(value);
   }
 
   return 0;
@@ -49,7 +54,7 @@ function formatMoney(value) {
 
 function parseDecimal(texto) {
   if (texto === null || texto === undefined) return 0;
-  const limpio = String(texto).trim().replaceAll(/,/g, '.');
+  const limpio = String(texto).trim().replaceAll(',', '.');
   if (limpio === '') return 0;
 
   const numero = Number.parseFloat(limpio);
@@ -60,18 +65,22 @@ function pad2(value) {
   return String(value).padStart(2, '0');
 }
 
-function formatDateTime(value) {
-  if (!value) return '';
+function parseFecha(value) {
+  if (!value) return null;
   const fecha = value instanceof Date ? value : new Date(value);
-  if (Number.isNaN(fecha.getTime())) return '';
+  return Number.isNaN(fecha.getTime()) ? null : fecha;
+}
+
+function formatDateTime(value) {
+  const fecha = parseFecha(value);
+  if (!fecha) return '';
 
   return `${pad2(fecha.getDate())}/${pad2(fecha.getMonth() + 1)}/${fecha.getFullYear()} ${pad2(fecha.getHours())}:${pad2(fecha.getMinutes())}`;
 }
 
 function formatDate(value) {
-  if (!value) return '';
-  const fecha = value instanceof Date ? value : new Date(value);
-  if (Number.isNaN(fecha.getTime())) return '';
+  const fecha = parseFecha(value);
+  if (!fecha) return '';
 
   return `${pad2(fecha.getDate())}/${pad2(fecha.getMonth() + 1)}/${fecha.getFullYear()}`;
 }

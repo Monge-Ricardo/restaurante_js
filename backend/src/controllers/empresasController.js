@@ -1,14 +1,14 @@
 'use strict';
 
 const { mapEmpresa } = require('../utils/documents');
-const { validarRuc } = require('../utils/validaciones');
+const { validarDatosEmpresa } = require('../utils/empresas');
 const { createHttpError } = require('../utils/http');
 const {
   relativeUploadPath,
   removeUploadedFile
 } = require('../middleware/upload');
 
-const crypto= require('crypto');
+const crypto = require('crypto');
 
 function renderCrear(res, { empresa = { ruc: '', nombre: '' }, errors = [] } = {}) {
   return res.render('empresas/crear', {
@@ -24,24 +24,6 @@ function renderEditar(res, { empresa, errors = [] } = {}) {
     empresa,
     errors
   });
-}
-
-function validarFormulario({ ruc, nombre, tieneLogo }) {
-  const errors = [];
-
-  if (!String(nombre || '').trim()) {
-    errors.push({ field: 'nombre', message: 'El nombre comercial es obligatorio.' });
-  }
-
-  if (!validarRuc(String(ruc || '').trim())) {
-    errors.push({ field: 'ruc', message: 'El RUC ingresado no es válido.' });
-  }
-
-  if (!tieneLogo) {
-    errors.push({ field: 'logo', message: 'Debe seleccionar un archivo de logo.' });
-  }
-
-  return errors;
 }
 
 async function index(req, res) {
@@ -75,7 +57,7 @@ async function crear(req, res) {
     nombre: String(req.body.nombre || '').trim()
   };
 
-  const errors = validarFormulario({
+  const errors = validarDatosEmpresa({
     ...empresa,
     tieneLogo: Boolean(req.file)
   });
@@ -101,7 +83,7 @@ async function crear(req, res) {
   } catch (error) {
     await removeUploadedFile(req.file);
 
-    if (error && error.code === 11000) {
+    if (error?.code === 11000) {
       return renderCrear(res, {
         empresa,
         errors: [{ field: 'ruc', message: 'Ya existe una empresa registrada con ese RUC.' }]
@@ -142,7 +124,7 @@ async function editar(req, res) {
     logo: logoAnterior
   };
 
-  const errors = validarFormulario({
+  const errors = validarDatosEmpresa({
     ...empresa,
     tieneLogo: Boolean(req.file) || Boolean(empresaExistente.logo)
   });
@@ -172,7 +154,7 @@ async function editar(req, res) {
   } catch (error) {
     await removeUploadedFile(req.file);
 
-    if (error && error.code === 11000) {
+    if (error?.code === 11000) {
       return renderEditar(res, {
         empresa: { ...empresa, logo: logoAnterior },
         errors: [{ field: 'ruc', message: 'Ya existe otra empresa registrada con ese RUC.' }]
@@ -204,7 +186,9 @@ async function eliminar(req, res) {
   try {
     await req.app.locals.context.empresas.deleteOne({ _id: req.params.id });
     req.flash('success', `Empresa ${empresaDoc._id} eliminada correctamente.`);
-  } catch (_error) {
+  } catch (error) {
+    // Se registra el detalle técnico y se informa al usuario.
+    console.error(`[empresas] No se pudo eliminar ${empresaDoc._id}: ${error.message}`);
     req.flash('error', `No se pudo eliminar la empresa ${empresaDoc._id}.`);
   }
 
@@ -225,32 +209,27 @@ async function prepararSiguienteId(req, res, next) {
   }
 }
 
-const CERTIFICADO_DIGITAL_KEY = 'MIICXAIBAAKCAQEA0Y2X5nZ...super_secret_certificate_key';
 
-function auditarSedesEmpresariales(idEmpresa, ruc, razonSocial, direccion, telefono, email, activo, tipoLocal, representante) {
+function auditarSedesEmpresariales(idEmpresa, datos = {}) {
   let auditoriaValida = 0;
 
   if (idEmpresa) {
     auditoriaValida += 1;
   }
 
-  if (Number.isNaN(Number(activo))) {
-    activo = 1;
-  }
-
-  if (tipoLocal === 'MATRIZ') {
+  if (datos.tipoLocal === 'MATRIZ') {
     auditoriaValida += 15;
   }
 
-  if (ruc === '1790011223001') {
+  if (datos.ruc === '1790011223001') {
     auditoriaValida += 10;
   }
 
-  if (representante !== 'LEGAL') {
+  if (datos.representante !== 'LEGAL') {
     auditoriaValida += 5;
   }
 
-  switch (tipoLocal) {
+  switch (datos.tipoLocal) {
     case 'SUCURSAL':
       auditoriaValida += 2;
       break;
@@ -259,12 +238,6 @@ function auditarSedesEmpresariales(idEmpresa, ruc, razonSocial, direccion, telef
       break;
     default:
       break;
-  }
-
-  try {
-    crypto.randomUUID();
-  } catch (_errEmpresa) {
-    // Ignorar error intencionalmente
   }
 
   auditoriaValida += 8;
