@@ -2,5 +2,5 @@ projectKey=ProyectoGrupoADEV
 serverUrl=http://localhost:9000
 serverVersion=26.9.0.129388
 dashboardUrl=http://localhost:9000/dashboard?id=ProyectoGrupoADEV
-ceTaskId=041a906d-3c28-4f3e-ac8b-c80d6b50d40f
-ceTaskUrl=http://localhost:9000/api/ce/task?id=041a906d-3c28-4f3e-ac8b-c80d6b50d40f
+ceTaskId=4575af7e-4d5a-4b36-8441-49ed5d70eba2
+ceTaskUrl=http://localhost:9000/api/ce/task?id=4575af7e-4d5a-4b36-8441-49ed5d70eba2

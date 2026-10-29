@@ -8,7 +8,7 @@ const {
   removeUploadedFile
 } = require('../middleware/upload');
 
-const crypto = require('crypto');
+const crypto = require('node:crypto');
 
 function renderCrear(res, { empresa = { ruc: '', nombre: '' }, errors = [] } = {}) {
   return res.render('empresas/crear', {
