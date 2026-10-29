@@ -7,7 +7,7 @@ const { createApp } = require('../../src/app');
 
 jest.setTimeout(30000);
 
-const databaseName = process.env.MONGODB_TEST_DB || 'Restaurante_GR07_Facturacion_TEST';
+const databaseName = process.env.MONGODB_DB || 'Restaurante_GR07';
 const coleccionesPrueba = ['facturas', 'clientes', 'empresas', 'empleados', 'platos'];
 let context;
 let app;
