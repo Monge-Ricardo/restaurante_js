@@ -94,7 +94,7 @@ describe('Platos API (Conexión Real a Base de Datos)', () => {
 
 
 
-  // PRUEBA 6 (FRACASO): Buscar un plato inexistente en la BD devuelve 404
+  // Buscar un plato inexistente en la BD devuelve 404
   test('GET /api/v1/platos/:id debe retornar 404 si el plato no existe en la BD', async () => {
     const res = await request(app).get('/api/v1/platos/PLA_NO_EXISTE_999');
     expect(res.statusCode).toBe(404);
