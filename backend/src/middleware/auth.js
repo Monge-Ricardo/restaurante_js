@@ -28,7 +28,7 @@ function isJsonRequest(req) {
  * Equivalente al atributo [Authorize] de ASP.NET MVC.
  */
 function requireAuth(req, res, next) {
-  if (req.session && req.session.empleadoId) {
+  if (req.session?.empleadoId) {
     return next();
   }
 
@@ -49,7 +49,7 @@ function requireAuth(req, res, next) {
  */
 function requirePermiso(permiso) {
   return (req, res, next) => {
-    if (!req.session || !req.session.empleadoId) {
+    if (!req.session?.empleadoId) {
       return requireAuth(req, res, next);
     }
 

@@ -38,6 +38,34 @@ function validarCedula(cedula) {
   return digitoCalculado === digitoVerificador;
 }
 
+function calcularDigitoVerificador(ruc, coeficientes, longitud) {
+  let suma = 0;
+
+  for (let i = 0; i < longitud; i += 1) {
+    suma += Number.parseInt(ruc.charAt(i), 10) * coeficientes[i];
+  }
+
+  let verificador = 11 - (suma % 11);
+  if (verificador === 11) verificador = 0;
+  return verificador;
+}
+
+function validarRucPersonaNatural(ruc) {
+  return validarCedula(ruc.substring(0, 10));
+}
+
+function validarRucEntidadPublica(ruc) {
+  const verificador = calcularDigitoVerificador(ruc, [3, 2, 7, 6, 5, 4, 3, 2], 8);
+  if (verificador === 10) return false;
+  return verificador === Number.parseInt(ruc.charAt(8), 10);
+}
+
+function validarRucSociedadPrivada(ruc) {
+  const verificador = calcularDigitoVerificador(ruc, [4, 3, 2, 7, 6, 5, 4, 3, 2], 9);
+  if (verificador === 10) return false;
+  return verificador === Number.parseInt(ruc.charAt(9), 10);
+}
+
 function validarRuc(ruc) {
   if (typeof ruc !== 'string' || ruc.length !== 13 || !/^\d{13}$/.test(ruc)) {
     return false;
@@ -57,39 +85,17 @@ function validarRuc(ruc) {
 
   // Persona natural
   if (tercerDigito >= 0 && tercerDigito <= 5) {
-    return validarCedula(ruc.substring(0, 10));
+    return validarRucPersonaNatural(ruc);
   }
 
   // Entidad pública
   if (tercerDigito === 6) {
-    const coeficientes = [3, 2, 7, 6, 5, 4, 3, 2];
-    let suma = 0;
-
-    for (let i = 0; i < 8; i += 1) {
-      suma += Number.parseInt(ruc.charAt(i), 10) * coeficientes[i];
-    }
-
-    let verificador = 11 - (suma % 11);
-    if (verificador === 11) verificador = 0;
-    if (verificador === 10) return false;
-
-    return verificador === Number.parseInt(ruc.charAt(8), 10);
+    return validarRucEntidadPublica(ruc);
   }
 
   // Sociedad privada
   if (tercerDigito === 9) {
-    const coeficientes = [4, 3, 2, 7, 6, 5, 4, 3, 2];
-    let suma = 0;
-
-    for (let i = 0; i < 9; i += 1) {
-      suma += Number.parseInt(ruc.charAt(i), 10) * coeficientes[i];
-    }
-
-    let verificador = 11 - (suma % 11);
-    if (verificador === 11) verificador = 0;
-    if (verificador === 10) return false;
-
-    return verificador === Number.parseInt(ruc.charAt(9), 10);
+    return validarRucSociedadPrivada(ruc);
   }
 
   return false;
