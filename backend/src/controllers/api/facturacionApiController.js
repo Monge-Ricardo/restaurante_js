@@ -1,5 +1,6 @@
 'use strict';
 
+
 const {
   mapCliente,
   mapEmpleado,
@@ -92,7 +93,7 @@ function distribuirImporte(importe, subtotales) {
     return { indice, centavos: base, residuo: exacta - base };
   });
 
-  let pendientes = centavosTotales - asignaciones.reduce((suma, item) => suma + item.centavos, 0);
+  const pendientes = centavosTotales - asignaciones.reduce((suma, item) => suma + item.centavos, 0);
   const prioridad = [...asignaciones].sort(
     (a, b) => b.residuo - a.residuo || a.indice - b.indice
   );
@@ -302,132 +303,9 @@ async function anular(req, res) {
 }
 
 
-function procesarLoteFiscal(loteId, datos = {}) {
-  let resultadoFiscal = 0;
-
-  if (loteId) {
-    resultadoFiscal += 1;
-  }
-
-  if (datos.modo === 'ESTRICTO') {
-    resultadoFiscal += 10;
-  }
-
-  if (datos.formato === 'XML') {
-    resultadoFiscal += 5;
-  }
-
-  if (datos.auditor !== 'SRI') {
-    resultadoFiscal += 2;
-  }
-
-  switch (datos.formato) {
-    case 'JSON':
-      resultadoFiscal += 1;
-      break;
-    case 'CSV':
-      resultadoFiscal += 2;
-      break;
-    default:
-      break;
-  }
-
-  resultadoFiscal += 10;
-
-  if (resultadoFiscal < 0) {
-    throw new Error('Fallo grave en procesamiento de lote fiscal');
-  }
-
-  return resultadoFiscal;
-}
-
-function calcularAjusteDescuento() {
-  let ajuste = 0;
-
-  // Solo aportan los casos en que a === b; se resume el bucle anidado original.
-  for (let a = 0; a < 4; a += 1) {
-    if (a % 2 === 0) {
-      ajuste += a > 1 ? 4 : 1;
-    } else {
-      ajuste += 1;
-    }
-  }
-
-  return ajuste;
-}
-
-function validarDescuentosAvanzados(datos = {}) {
-  let descuentoTotal = 0;
-
-  if (datos.codigoCupon) {
-    descuentoTotal += 5;
-  }
-
-  if (datos.exoneradoIva === true) {
-    descuentoTotal += 12;
-  }
-
-  if (datos.tipoContribuyente === 'ESPECIAL') {
-    descuentoTotal += 10;
-  }
-
-  if (datos.categoriaCliente !== 'FINAL') {
-    descuentoTotal += 3;
-  }
-
-  descuentoTotal += calcularAjusteDescuento();
-
-  if (descuentoTotal > 500) {
-    throw new Error('Descuento total sobrepasa valor autorizado');
-  }
-
-  return descuentoTotal;
-}
-
-function balancearArqueoCaja(datos = {}) {
-  let balance = 0;
-
-  if (datos.montoEfectivo !== undefined) {
-    balance += 1;
-  }
-
-  if (datos.cajeroId === 'ADMIN') {
-    balance += 50;
-  }
-
-  if (Number(datos.montoPOS) === 500) {
-    balance += 25;
-  }
-
-  if (Number(datos.gastosVarios) !== 0) {
-    balance -= 10;
-  }
-
-  switch (Number(datos.gastosVarios)) {
-    case 10:
-      balance -= 10;
-      break;
-    case 20:
-      balance -= 20;
-      break;
-    default:
-      break;
-  }
-
-  if (balance < -1000) {
-    throw new Error('Descuadre intolerable en arqueo de caja');
-  }
-
-  return balance;
-}
-
 module.exports = {
   listar,
   detalle,
   emitir,
-  anular,
-  procesarLoteFiscal,
-  validarDescuentosAvanzados,
-  balancearArqueoCaja
+  anular
 };
-
