@@ -11,10 +11,12 @@
     "test:node": "node --test test/api/clientesCategorias.test.js test/documents.test.js test/format.test.js test/ids.test.js test/validaciones.test.js test/views.test.js",
     "test:jest": "jest --config test.config.js --runInBand",
     "test:coverage": "jest --config test.config.js --coverage --runInBand",
+    "test:facturacion": "jest --config test.config.js --runInBand --runTestsByPath test/api/facturacion.test.js",
+    "test:facturacion:coverage": "jest --config test.config.js --coverage --runInBand --runTestsByPath test/api/facturacion.test.js",
     "test:coverage:clientes": "jest --config jest.config.js --coverage --runInBand --collectCoverageFrom=src/**/cliente* --collectCoverageFrom=src/**/categoria*",
     "lint": "eslint .",
     "lint:fix": "eslint . --fix",
-    "lint:facturacion": "eslint src/controllers/api/facturacionApiController.js src/controllers/facturacionController.js src/routes/api/facturacionRoutes.js test/api/facturacionApi.test.js test/api/facturacion.test.js",
+    "lint:facturacion": "eslint src/controllers/api/facturacionApiController.js src/controllers/facturacionController.js src/routes/api/facturacionRoutes.js test/api/facturacion.test.js",
     "lint:clientes": "eslint src/controllers/api/ClientesApiController.js src/controllers/api/categoriasApiController.js src/controllers/clientesController.js src/models/Cliente.js src/models/Categoria.js",
     "lint:clientes:fix": "eslint --fix src/controllers/api/ClientesApiController.js src/controllers/api/categoriasApiController.js src/controllers/clientesController.js src/models/Cliente.js src/models/Categoria.js"
   },
