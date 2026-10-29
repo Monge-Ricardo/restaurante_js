@@ -15,7 +15,7 @@
     "test:facturacion:coverage": "jest --config test.config.js --coverage --runInBand --runTestsByPath test/api/facturacion.test.js",
     "test:platos": "jest --config test.config.js --runInBand --runTestsByPath test/api/platos.test.js",
     "test:platos:coverage": "jest --config test.config.js --coverage --runInBand --runTestsByPath test/api/platos.test.js",
-    "test:coverage:clientes": "jest --config jest.config.js --coverage --runInBand --collectCoverageFrom=src/**/cliente* --collectCoverageFrom=src/**/categoria*",
+    "test:coverage:api": "jest --config test.config.js --coverage --runInBand --collectCoverageFrom=\"src/controllers/api/**\" --collectCoverageFrom=\"src/routes/api/**\" --collectCoverageFrom=\"src/models/**\"",
     "test:coverage:platos": "jest --config jest.config.js --coverage --runInBand --runTestsByPath test/api/platos.test.js --collectCoverageFrom=src/controllers/api/platosApiController.js --collectCoverageFrom=src/routes/api/platosRoutes.js",
     "lint": "eslint .",
     "lint:fix": "eslint . --fix",

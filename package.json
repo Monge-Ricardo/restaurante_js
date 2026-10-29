@@ -12,7 +12,7 @@
     "test": "npm --workspace=backend test",
     "test:jest": "npm --workspace=backend run test:jest",
     "test:coverage": "npm --workspace=backend run test:coverage",
-    "test:coverage:clientes": "npm --workspace=backend run test:coverage:clientes",
+    "test:coverage:api": "npm --workspace=backend run test:coverage:api",
     "test:platos": "npm --workspace=backend run test:platos",
     "test:platos:coverage": "npm --workspace=backend run test:platos:coverage",
     "test:coverage:platos": "npm --workspace=backend run test:coverage:platos",

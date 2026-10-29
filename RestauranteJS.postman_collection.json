@@ -1,0 +1,511 @@
+{
+  "info": {
+    "_postman_id": "a8f3d2e1-7c6b-4b5a-9d8e-1f2a3b4c5d6e",
+    "name": "RestauranteJS - API v1",
+    "description": "Colección de Postman para verificar el funcionamiento de todos los módulos REST (/api/v1) del proyecto RestauranteJS (Categorías, Clientes, Empresas, Platos y Facturación).",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+  },
+  "variable": [
+    {
+      "key": "baseUrl",
+      "value": "http://localhost:3000/api/v1",
+      "type": "string"
+    }
+  ],
+  "item": [
+    {
+      "name": "0. Health Check",
+      "item": [
+        {
+          "name": "Estado de la API (/health)",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/health",
+              "host": ["{{baseUrl}}"],
+              "path": ["health"]
+            },
+            "description": "Verifica que el servidor Express esté en línea."
+          }
+        }
+      ]
+    },
+    {
+      "name": "1. Categorías",
+      "item": [
+        {
+          "name": "Listar Categorías",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/categorias",
+              "host": ["{{baseUrl}}"],
+              "path": ["categorias"]
+            }
+          }
+        },
+        {
+          "name": "Obtener Categoría por ID",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/categorias/CAT001",
+              "host": ["{{baseUrl}}"],
+              "path": ["categorias", "CAT001"]
+            }
+          }
+        },
+        {
+          "name": "Crear Categoría",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"nombre\": \"Especialidades\"\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/categorias",
+              "host": ["{{baseUrl}}"],
+              "path": ["categorias"]
+            }
+          }
+        },
+        {
+          "name": "Actualizar Categoría",
+          "request": {
+            "method": "PUT",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"nombre\": \"Especialidades de la Casa\"\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/categorias/CAT006",
+              "host": ["{{baseUrl}}"],
+              "path": ["categorias", "CAT006"]
+            }
+          }
+        },
+        {
+          "name": "Eliminar Categoría",
+          "request": {
+            "method": "DELETE",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/categorias/CAT006",
+              "host": ["{{baseUrl}}"],
+              "path": ["categorias", "CAT006"]
+            },
+            "description": "Elimina una categoría siempre que no tenga platos asociados."
+          }
+        }
+      ]
+    },
+    {
+      "name": "2. Clientes",
+      "item": [
+        {
+          "name": "Listar Clientes",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/clientes",
+              "host": ["{{baseUrl}}"],
+              "path": ["clientes"]
+            }
+          }
+        },
+        {
+          "name": "Filtrar Cliente por Cédula",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/clientes?cedula=1710034065",
+              "host": ["{{baseUrl}}"],
+              "path": ["clientes"],
+              "query": [
+                {
+                  "key": "cedula",
+                  "value": "1710034065"
+                }
+              ]
+            }
+          }
+        },
+        {
+          "name": "Obtener Cliente por ID",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/clientes/CLI001",
+              "host": ["{{baseUrl}}"],
+              "path": ["clientes", "CLI001"]
+            }
+          }
+        },
+        {
+          "name": "Crear Cliente",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"nombre\": \"Juan\",\n  \"apellido\": \"Pérez\",\n  \"cedula\": \"1710034065\",\n  \"telefono\": \"0991234567\",\n  \"correo\": \"juan.perez@restaurante.com\"\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/clientes",
+              "host": ["{{baseUrl}}"],
+              "path": ["clientes"]
+            }
+          }
+        },
+        {
+          "name": "Actualizar Cliente",
+          "request": {
+            "method": "PUT",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"nombre\": \"Juan Carlos\",\n  \"apellido\": \"Pérez\",\n  \"cedula\": \"1710034065\",\n  \"telefono\": \"0987654321\",\n  \"correo\": \"juancarlos.perez@restaurante.com\"\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/clientes/CLI001",
+              "host": ["{{baseUrl}}"],
+              "path": ["clientes", "CLI001"]
+            }
+          }
+        },
+        {
+          "name": "Eliminar Cliente",
+          "request": {
+            "method": "DELETE",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/clientes/CLI001",
+              "host": ["{{baseUrl}}"],
+              "path": ["clientes", "CLI001"]
+            },
+            "description": "Elimina un cliente si no tiene facturas emitidas a su nombre."
+          }
+        }
+      ]
+    },
+    {
+      "name": "3. Empresas (Locales)",
+      "item": [
+        {
+          "name": "Listar Empresas",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/empresas",
+              "host": ["{{baseUrl}}"],
+              "path": ["empresas"]
+            }
+          }
+        },
+        {
+          "name": "Obtener Empresa por ID",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/empresas/LOC001",
+              "host": ["{{baseUrl}}"],
+              "path": ["empresas", "LOC001"]
+            }
+          }
+        },
+        {
+          "name": "Crear Empresa (Multipart Form-Data con Logo)",
+          "request": {
+            "method": "POST",
+            "header": [],
+            "body": {
+              "mode": "formdata",
+              "formdata": [
+                {
+                  "key": "ruc",
+                  "value": "1710034065001",
+                  "type": "text"
+                },
+                {
+                  "key": "nombre",
+                  "value": "Restaurante Sabor Ecuatoriano",
+                  "type": "text"
+                },
+                {
+                  "key": "logo",
+                  "type": "file",
+                  "src": "frontend/public/uploads/Platos/PLA002_churrasco.jpg",
+                  "description": "Selecciona una imagen (.jpg, .png, .webp, .gif)"
+                }
+              ]
+            },
+            "url": {
+              "raw": "{{baseUrl}}/empresas",
+              "host": ["{{baseUrl}}"],
+              "path": ["empresas"]
+            },
+            "description": "Crea un local. Requiere enviar un archivo de imagen en el campo 'logo'."
+          }
+        },
+        {
+          "name": "Actualizar Empresa",
+          "request": {
+            "method": "PUT",
+            "header": [],
+            "body": {
+              "mode": "formdata",
+              "formdata": [
+                {
+                  "key": "ruc",
+                  "value": "1710034065001",
+                  "type": "text"
+                },
+                {
+                  "key": "nombre",
+                  "value": "Restaurante Sabor Ecuatoriano - Matriz",
+                  "type": "text"
+                }
+              ]
+            },
+            "url": {
+              "raw": "{{baseUrl}}/empresas/LOC001",
+              "host": ["{{baseUrl}}"],
+              "path": ["empresas", "LOC001"]
+            },
+            "description": "Actualiza los datos de la empresa. El archivo 'logo' es opcional si la empresa ya tenía uno."
+          }
+        },
+        {
+          "name": "Eliminar Empresa",
+          "request": {
+            "method": "DELETE",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/empresas/LOC001",
+              "host": ["{{baseUrl}}"],
+              "path": ["empresas", "LOC001"]
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "4. Platos",
+      "item": [
+        {
+          "name": "Listar Platos",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/platos",
+              "host": ["{{baseUrl}}"],
+              "path": ["platos"]
+            }
+          }
+        },
+        {
+          "name": "Filtrar Platos por Categoría",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/platos?categoria=CAT003",
+              "host": ["{{baseUrl}}"],
+              "path": ["platos"],
+              "query": [
+                {
+                  "key": "categoria",
+                  "value": "CAT003"
+                }
+              ]
+            }
+          }
+        },
+        {
+          "name": "Obtener Plato por ID",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/platos/PLA001",
+              "host": ["{{baseUrl}}"],
+              "path": ["platos", "PLA001"]
+            }
+          }
+        },
+        {
+          "name": "Crear Plato",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"nombre\": \"Hornado Tradicional\",\n  \"descripcion\": \"Hornado de cerdo con llapingachos, mote y agrio\",\n  \"precio\": 8.50,\n  \"id_categoria\": \"CAT003\",\n  \"imagen\": \"/Uploads/Platos/PLA002_churrasco.jpg\"\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/platos",
+              "host": ["{{baseUrl}}"],
+              "path": ["platos"]
+            }
+          }
+        },
+        {
+          "name": "Actualizar Plato",
+          "request": {
+            "method": "PUT",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"nombre\": \"Hornado Especial\",\n  \"descripcion\": \"Porción especial de hornado con llapingachos, aguacate y cuero reventado\",\n  \"precio\": 9.75,\n  \"id_categoria\": \"CAT003\"\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/platos/PLA001",
+              "host": ["{{baseUrl}}"],
+              "path": ["platos", "PLA001"]
+            }
+          }
+        },
+        {
+          "name": "Eliminar Plato",
+          "request": {
+            "method": "DELETE",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/platos/PLA001",
+              "host": ["{{baseUrl}}"],
+              "path": ["platos", "PLA001"]
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "5. Facturación",
+      "item": [
+        {
+          "name": "Listar Facturas",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/facturas",
+              "host": ["{{baseUrl}}"],
+              "path": ["facturas"]
+            }
+          }
+        },
+        {
+          "name": "Filtrar Facturas por Fechas",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/facturas?desde=2026-01-01&hasta=2026-12-31",
+              "host": ["{{baseUrl}}"],
+              "path": ["facturas"],
+              "query": [
+                {
+                  "key": "desde",
+                  "value": "2026-01-01"
+                },
+                {
+                  "key": "hasta",
+                  "value": "2026-12-31"
+                }
+              ]
+            }
+          }
+        },
+        {
+          "name": "Obtener Detalle de Factura por ID",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/facturas/FAC001",
+              "host": ["{{baseUrl}}"],
+              "path": ["facturas", "FAC001"]
+            }
+          }
+        },
+        {
+          "name": "Emitir Factura",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"idCliente\": \"CLI001\",\n  \"idEmpresa\": \"LOC001\",\n  \"idEmpleado\": \"EMP001\",\n  \"detalles\": [\n    {\n      \"idPlato\": \"PLA001\",\n      \"cantidad\": 2\n    }\n  ]\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/facturas",
+              "host": ["{{baseUrl}}"],
+              "path": ["facturas"]
+            },
+            "description": "Emite una nueva factura. Calcula automáticamente IVA (15%) y tarifa de servicio (10%). Requiere que existan previamente el cliente, la empresa, el empleado (ej. EMP001) y los platos indicados."
+          }
+        },
+        {
+          "name": "Anular Factura",
+          "request": {
+            "method": "DELETE",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/facturas/FAC001",
+              "host": ["{{baseUrl}}"],
+              "path": ["facturas", "FAC001"]
+            },
+            "description": "Cambia el estado de la factura a ANULADA."
+          }
+        }
+      ]
+    }
+  ]
+}

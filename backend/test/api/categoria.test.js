@@ -8,19 +8,21 @@ let app;
 let context;
 
 beforeAll(async () => {
-  // Conexión real a la base de datos MongoDB Atlas
   context = await MongoContext.connect(config.mongoUri, config.mongoDbName);
   app = createApp({ context });
 });
 
 afterAll(async () => {
-  // Cerrar la conexión a la base de datos al terminar
   if (context) {
     await context.close();
   }
 });
 
 describe('Categorias API (Conexión Real a Base de Datos)', () => {
+
+  // ==========================================
+  // PRUEBAS DE ÉXITO
+  // ==========================================
 
   // PRUEBA 1 (ÉXITO): Listar categorias existentes en la base de datos devuelve 200
   test('GET /api/v1/categorias debe retornar status 200 y las categorías de la BD', async () => {
@@ -41,40 +43,96 @@ describe('Categorias API (Conexión Real a Base de Datos)', () => {
 
   // PRUEBA 3 (ÉXITO): Crear una nueva categoría válida devuelve status 201
   test('POST /api/v1/categorias debe registrar una nueva categoría y retornar status 201', async () => {
-    // Limpiamos por si existía de ejecuciones previas
     await context.categorias.deleteOne({ nombre: 'Postres Especiales' });
 
     const res = await request(app).post('/api/v1/categorias').send({ nombre: 'Postres Especiales' });
     expect(res.statusCode).toBe(201);
     expect(res.body.success).toBe(true);
     expect(res.body.data.nombre).toBe('Postres Especiales');
+  });
 
-    // Limpieza posterior
-    await context.categorias.deleteOne({ nombre: 'Postres Especiales' });
+  // PRUEBA 4 (ÉXITO): Actualizar una categoría existente devuelve status 200
+  test('PUT /api/v1/categorias/:id debe actualizar el nombre de la categoría y retornar status 200', async () => {
+    const cat = await context.categorias.findOne({ nombre: 'Postres Especiales' });
+
+    const res = await request(app)
+      .put(`/api/v1/categorias/${cat._id}`)
+      .send({ nombre: 'Postres Gourmet' });
+
+    expect(res.statusCode).toBe(200);
+    expect(res.body.success).toBe(true);
+    expect(res.body.data.nombre).toBe('Postres Gourmet');
+  });
+
+  // PRUEBA 5 (ÉXITO): Eliminar una categoría sin platos asociados devuelve status 200
+  test('DELETE /api/v1/categorias/:id debe eliminar la categoría y retornar status 200', async () => {
+    const cat = await context.categorias.findOne({ nombre: 'Postres Gourmet' });
+
+    const res = await request(app).delete(`/api/v1/categorias/${cat._id}`);
+    expect(res.statusCode).toBe(200);
+    expect(res.body.success).toBe(true);
+    expect(res.body.data.message).toContain('eliminada con éxito');
   });
 
   // ==========================================
-  // PRUEBAS DE FRACASO (3)
+  // PRUEBAS DE FRACASO
   // ==========================================
 
-  // PRUEBA 4 (FRACASO): Buscar una categoría inexistente en la BD devuelve 404
+  // PRUEBA 6 (FRACASO): Buscar una categoría inexistente en la BD devuelve 404
   test('GET /api/v1/categorias/:id debe retornar 404 si la categoría no existe en la BD', async () => {
     const res = await request(app).get('/api/v1/categorias/CAT_NO_EXISTE_999');
     expect(res.statusCode).toBe(404);
     expect(res.body.success).toBe(false);
   });
 
-  // PRUEBA 5 (FRACASO): Intentar registrar una categoría con nombre de 1 sola letra devuelve 400
+  // PRUEBA 7 (FRACASO): Intentar registrar una categoría con nombre de 1 sola letra devuelve 400
   test('POST /api/v1/categorias debe retornar 400 si el nombre tiene menos de 2 letras', async () => {
     const res = await request(app).post('/api/v1/categorias').send({ nombre: 'A' });
     expect(res.statusCode).toBe(400);
     expect(res.body.success).toBe(false);
   });
 
-  // PRUEBA 6 (FRACASO): Intentar registrar una categoría con nombre duplicado (ej. 'Entradas') devuelve 409
+  // PRUEBA 8 (FRACASO): Intentar registrar una categoría con nombre duplicado devuelve 409
   test('POST /api/v1/categorias debe retornar 409 si el nombre ya existe en la BD', async () => {
     const res = await request(app).post('/api/v1/categorias').send({ nombre: 'Entradas' });
     expect(res.statusCode).toBe(409);
+    expect(res.body.success).toBe(false);
+  });
+
+  // PRUEBA 9 (FRACASO): Actualizar una categoría con ID inexistente devuelve 404
+  test('PUT /api/v1/categorias/:id debe retornar 404 si la categoría a actualizar no existe', async () => {
+    const res = await request(app)
+      .put('/api/v1/categorias/CAT_NO_EXISTE_999')
+      .send({ nombre: 'Inexistente' });
+
+    expect(res.statusCode).toBe(404);
+    expect(res.body.success).toBe(false);
+  });
+
+  // PRUEBA 10 (FRACASO): Actualizar una categoría con nombre inválido devuelve 400
+  test('PUT /api/v1/categorias/:id debe retornar 400 si el nuevo nombre es inválido', async () => {
+    const res = await request(app)
+      .put('/api/v1/categorias/CAT001')
+      .send({ nombre: 'A' });
+
+    expect(res.statusCode).toBe(400);
+    expect(res.body.success).toBe(false);
+  });
+
+  // PRUEBA 11 (FRACASO): Actualizar una categoría con nombre ya existente devuelve 409
+  test('PUT /api/v1/categorias/:id debe retornar 409 si el nombre ya le pertenece a otra categoría', async () => {
+    const res = await request(app)
+      .put('/api/v1/categorias/CAT001')
+      .send({ nombre: 'Sopas' }); // 'Sopas' ya existe en CAT002
+
+    expect(res.statusCode).toBe(409);
+    expect(res.body.success).toBe(false);
+  });
+
+  // PRUEBA 12 (FRACASO): Eliminar una categoría inexistente devuelve 404
+  test('DELETE /api/v1/categorias/:id debe retornar 404 si la categoría no existe', async () => {
+    const res = await request(app).delete('/api/v1/categorias/CAT_NO_EXISTE_999');
+    expect(res.statusCode).toBe(404);
     expect(res.body.success).toBe(false);
   });
 
