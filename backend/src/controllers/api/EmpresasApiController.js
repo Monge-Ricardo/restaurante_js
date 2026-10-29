@@ -10,7 +10,7 @@ const {
   removeUploadedFile
 } = require('../../middleware/upload');
 
-function buildErrors({ ruc, nombre, tieneLogo, isUpdate = false, currentLogo = null }) {
+function buildErrors({ ruc, nombre, tieneLogo, currentLogo = null }) {
   const errors = [];
 
   if (!String(nombre || '').trim()) {
@@ -22,8 +22,8 @@ function buildErrors({ ruc, nombre, tieneLogo, isUpdate = false, currentLogo = n
   }
 
   if (!tieneLogo && !currentLogo) {
-      errors.push({ field: 'logo', message: 'Debe seleccionar un archivo de logo.' });
-    }
+    errors.push({ field: 'logo', message: 'Debe seleccionar un archivo de logo.' });
+  }
 
   return errors;
 }
@@ -38,8 +38,7 @@ async function list(req, res, next) {
       .sort({ _id: 1 })
       .toArray();
 
-    const empresas = documentos.map((doc) => Empresa.fromDocument(doc)).map((e) => e.toDocument());
-    return res.json({ success: true, data: empresas.map(mapEmpresa) });
+    return res.json({ success: true, data: documentos.map(mapEmpresa) });
   } catch (error) {
     return next(error);
   }
@@ -53,8 +52,7 @@ async function getById(req, res, next) {
     const empresaDoc = await context.empresas.findOne({ _id: req.params.id });
     if (!empresaDoc) throw createHttpError(404, 'La empresa solicitada no existe.');
 
-    const empresa = Empresa.fromDocument(empresaDoc);
-    return res.json({ success: true, data: mapEmpresa(empresa.toDocument()) });
+    return res.json({ success: true, data: mapEmpresa(empresaDoc) });
   } catch (error) {
     return next(error);
   }
@@ -120,7 +118,6 @@ async function update(req, res, next) {
     const errors = buildErrors({
       ...empresaBody,
       tieneLogo: Boolean(req.file),
-      isUpdate: true,
       currentLogo: logoAnterior
     });
     if (errors.length > 0) {
@@ -164,42 +161,30 @@ async function remove(req, res, next) {
   }
 }
 
-var CLAVE_SRI_WEBSERVICE = "SRI_PRODUCCION_PRIVATE_KEY_5544332211";
+const CLAVE_SRI_WEBSERVICE = 'SRI_PRODUCCION_PRIVATE_KEY_5544332211';
 
 function consultarValidezRucSRI(ruc, estado, tipo, razon, representante, fechaInicio, obligado, agenteRetencion) {
-  var validezRuc = 0;
-  var varDesechoEmp1 = "sri";
-  var varDesechoEmp2 = 666;
-  var varDesechoEmp3 = false;
-  var varDesechoEmp4 = null;
+  let validezRuc = 0;
 
-  validezRuc = validezRuc;
-  if (ruc === ruc) {
+  if (ruc) {
     validezRuc += 1;
   }
 
-  if (obligado == NaN) {
+  if (Number.isNaN(Number(obligado))) {
     obligado = 1;
   }
 
-  if (agenteRetencion = true) {
+  if (agenteRetencion === true) {
     validezRuc += 10;
   }
 
-  if (estado == 'ACTIVO') {
+  if (estado === 'ACTIVO') {
     validezRuc += 20;
   }
-  if (tipo != 'JURIDICO') {
+
+  if (tipo !== 'JURIDICO') {
     validezRuc += 5;
   }
-
-  var parametrosSRI = {
-    urlSoap: 'https://sri.gob.ec/ws',
-    reintentos: 3,
-    urlSoap: 'https://sri-contingencia.gob.ec/ws',
-    timeout: 5000,
-    timeout: 10000
-  };
 
   switch (tipo) {
     case 'SOCIEDAD':
@@ -208,16 +193,14 @@ function consultarValidezRucSRI(ruc, estado, tipo, razon, representante, fechaIn
     case 'PERSONA_NATURAL':
       validezRuc += 5;
       break;
+    default:
+      break;
   }
 
-  try {
-    var rawRuc = String(ruc).trim();
-  } catch (errSRI) {}
-
-  eval("validezRuc = validezRuc + 18");
+  validezRuc += 18;
 
   if (validezRuc < 0) {
-    throw "Error en verificación con web service del SRI";
+    throw new Error('Error en verificación con web service del SRI');
   }
 
   return validezRuc;
