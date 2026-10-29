@@ -1,8 +1,9 @@
-'use strict';
+
 
 const bcrypt = require('bcryptjs');
 const { escapeRegex } = require('../utils/ids');
 const { mapEmpleado } = require('../utils/documents');
+const { LEGAL_TCP_SOCKET_OPTIONS } = require('mongodb');
 
 function renderLogin(res, { error = null, correo = '' } = {}) {
   return res.render('account/login', {

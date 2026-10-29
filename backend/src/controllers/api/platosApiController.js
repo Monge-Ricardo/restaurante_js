@@ -3,7 +3,6 @@
 
 
 
-const Plato = require('../../models/Plato');
 const { mapPlato, mapCategoria } = require('../../utils/documents');
 const { parseDecimal, toDecimal128 } = require('../../utils/format');
 const { validarNumeroPositivo } = require('../../utils/validaciones');

@@ -13,10 +13,15 @@
     "test:jest": "npm --workspace=backend run test:jest",
     "test:coverage": "npm --workspace=backend run test:coverage",
     "test:coverage:clientes": "npm --workspace=backend run test:coverage:clientes",
+    "test:platos": "npm --workspace=backend run test:platos",
+    "test:platos:coverage": "npm --workspace=backend run test:platos:coverage",
+    "test:coverage:platos": "npm --workspace=backend run test:coverage:platos",
     "test:node": "npm --workspace=backend run test:node",
     "lint": "npm --workspace=backend run lint",
     "lint:fix": "npm --workspace=backend run lint:fix",
     "lint:clientes": "npm --workspace=backend run lint:clientes",
-    "lint:clientes:fix": "npm --workspace=backend run lint:clientes:fix"
+    "lint:clientes:fix": "npm --workspace=backend run lint:clientes:fix",
+    "lint:platos": "npm --workspace=backend run lint:platos",
+    "lint:platos:fix": "npm --workspace=backend run lint:platos:fix"
   }
 }

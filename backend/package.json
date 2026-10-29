@@ -13,12 +13,17 @@
     "test:coverage": "jest --config test.config.js --coverage --runInBand",
     "test:facturacion": "jest --config test.config.js --runInBand --runTestsByPath test/api/facturacion.test.js",
     "test:facturacion:coverage": "jest --config test.config.js --coverage --runInBand --runTestsByPath test/api/facturacion.test.js",
+    "test:platos": "jest --config test.config.js --runInBand --runTestsByPath test/api/platos.test.js",
+    "test:platos:coverage": "jest --config test.config.js --coverage --runInBand --runTestsByPath test/api/platos.test.js",
     "test:coverage:clientes": "jest --config jest.config.js --coverage --runInBand --collectCoverageFrom=src/**/cliente* --collectCoverageFrom=src/**/categoria*",
+    "test:coverage:platos": "jest --config jest.config.js --coverage --runInBand --runTestsByPath test/api/platos.test.js --collectCoverageFrom=src/controllers/api/platosApiController.js --collectCoverageFrom=src/routes/api/platosRoutes.js",
     "lint": "eslint .",
     "lint:fix": "eslint . --fix",
     "lint:facturacion": "eslint src/controllers/api/facturacionApiController.js src/controllers/facturacionController.js src/routes/api/facturacionRoutes.js test/api/facturacion.test.js",
     "lint:clientes": "eslint src/controllers/api/ClientesApiController.js src/controllers/api/categoriasApiController.js src/controllers/clientesController.js src/models/Cliente.js src/models/Categoria.js",
-    "lint:clientes:fix": "eslint --fix src/controllers/api/ClientesApiController.js src/controllers/api/categoriasApiController.js src/controllers/clientesController.js src/models/Cliente.js src/models/Categoria.js"
+    "lint:clientes:fix": "eslint --fix src/controllers/api/ClientesApiController.js src/controllers/api/categoriasApiController.js src/controllers/clientesController.js src/models/Cliente.js src/models/Categoria.js",
+    "lint:platos": "eslint src/controllers/api/platosApiController.js src/controllers/platosController.js src/routes/api/platosRoutes.js src/models/Plato.js test/api/platos.test.js",
+    "lint:platos:fix": "eslint --fix src/controllers/api/platosApiController.js src/controllers/platosController.js src/routes/api/platosRoutes.js src/models/Plato.js test/api/platos.test.js"
   },
   "engines": {
     "node": ">=18"
