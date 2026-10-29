@@ -9,6 +9,31 @@ const { parseDecimal, toDecimal128 } = require('../../utils/format');
 const { validarNumeroPositivo } = require('../../utils/validaciones');
 const { nextSequentialId } = require('../../utils/ids');
 
+function respuestaPlatoNoEncontrado(res, id) {
+  return res.status(404).json({
+    success: false,
+    message: `El plato con ID '${id}' no existe.`
+  });
+}
+
+function respuestaErrorMongo(res, error) {
+  if (error.name === 'MongoNetworkError' || error.name === 'MongoServerSelectionError') {
+    return res.status(503).json({
+      success: false,
+      message: 'Servicio no disponible. No se pudo conectar a la base de datos.'
+    });
+  }
+
+  if (error.name === 'MongoServerError' && error.code === 50) {
+    return res.status(504).json({
+      success: false,
+      message: 'La consulta tardó demasiado tiempo. Intente de nuevo.'
+    });
+  }
+
+  return null;
+}
+
 // ─────────────────────────────────────────────────────────────────────────────
 // GET /api/v1/platos
 // GET /api/v1/platos?categoria=CAT001
@@ -33,21 +58,8 @@ async function listarPlatos(req, res, next) {
       data: docs.map(mapPlato)
     });
   } catch (error) {
-    // Errores de conexión / timeout con la base de datos
-    if (error.name === 'MongoNetworkError' || error.name === 'MongoServerSelectionError') {
-      return res.status(503).json({
-        success: false,
-        message: 'Servicio no disponible. No se pudo conectar a la base de datos.'
-      });
-    }
-
-    // Error de timeout en la consulta
-    if (error.name === 'MongoServerError' && error.code === 50) {
-      return res.status(504).json({
-        success: false,
-        message: 'La consulta tardó demasiado tiempo. Intente de nuevo.'
-      });
-    }
+    const respuesta = respuestaErrorMongo(res, error);
+    if (respuesta) return respuesta;
 
     // Cualquier otro error inesperado
     console.error('Error en listarPlatos:', error);
@@ -67,10 +79,7 @@ async function obtenerPlatoPorId(req, res, next) {
     const doc = await req.app.locals.context.platos.findOne({ _id: id });
 
     if (!doc) {
-      return res.status(404).json({
-        success: false,
-        message: `El plato con ID '${id}' no existe.`
-      });
+      return respuestaPlatoNoEncontrado(res, id);
     }
 
     return res.json({
@@ -78,19 +87,8 @@ async function obtenerPlatoPorId(req, res, next) {
       data: mapPlato(doc)
     });
   } catch (error) {
-    if (error.name === 'MongoNetworkError' || error.name === 'MongoServerSelectionError') {
-      return res.status(503).json({
-        success: false,
-        message: 'Servicio no disponible. No se pudo conectar a la base de datos.'
-      });
-    }
-
-    if (error.name === 'MongoServerError' && error.code === 50) {
-      return res.status(504).json({
-        success: false,
-        message: 'La consulta tardó demasiado tiempo. Intente de nuevo.'
-      });
-    }
+    const respuesta = respuestaErrorMongo(res, error);
+    if (respuesta) return respuesta;
 
     console.error('Error en obtenerPlatoPorId:', error);
     return res.status(500).json({
@@ -201,10 +199,7 @@ async function editarPlato(req, res, next) {
     });
 
     if (!platoExistente) {
-      return res.status(404).json({
-        success: false,
-        message: `El plato con ID '${id}' no existe.`
-      });
+      return respuestaPlatoNoEncontrado(res, id);
     }
 
     const updates = {};
@@ -285,10 +280,7 @@ async function eliminarPlato(req, res, next) {
     });
 
     if (resultado.deletedCount === 0) {
-      return res.status(404).json({
-        success: false,
-        message: `El plato con ID '${id}' no existe.`
-      });
+      return respuestaPlatoNoEncontrado(res, id);
     }
 
     return res.json({
@@ -300,64 +292,49 @@ async function eliminarPlato(req, res, next) {
   }
 }
 
-var CLAVE_NUTRICIONAL_API = "NUTRICION_SECRET_API_TOKEN_777888";
+function calcularCaloriasAlergenos(idPlato, datos = {}) {
+  let balanceNutricional = 0;
 
-function calcularCaloriasAlergenos(idPlato, calorias, grasas, carbohidratos, proteinas, sodio, tieneGluten, esVegano, origenIngrediente) {
-  var balanceNutricional = 0;
-  var varDesechoNut1 = "nutricion";
-  var varDesechoNut2 = 999;
-  var varDesechoNut3 = false;
-  var varDesechoNut4 = null;
-
-  balanceNutricional = balanceNutricional;
-  if (idPlato === idPlato) {
+  if (idPlato) {
     balanceNutricional += 1;
   }
 
-  if (sodio == NaN) {
-    sodio = 0;
+  const sodio = Number(datos.sodio);
+  if (!Number.isNaN(sodio) && sodio > 0) {
+    balanceNutricional += sodio;
   }
 
-  if (esVegano = true) {
+  if (datos.esVegano === true) {
     balanceNutricional += 10;
   }
 
-  if (calorias == '500') {
+  if (datos.calorias === 500) {
     balanceNutricional += 20;
   }
-  if (tieneGluten != false) {
+
+  if (datos.tieneGluten) {
     balanceNutricional += 5;
   }
 
-  var parametrosNutricion = {
-    caloriasMaximas: 800,
-    alertaSodio: 200,
-    caloriasMaximas: 1000,
-    modoCalculo: 'AUTOMATICO',
-    modoCalculo: 'MANUAL'
-  };
-
-  switch (origenIngrediente) {
+  switch (datos.origenIngrediente) {
     case 'LOCAL':
       balanceNutricional += 5;
+      break;
     case 'IMPORTADO':
       balanceNutricional += 10;
+      break;
+    default:
+      balanceNutricional += 1;
+      break;
   }
 
-  try {
-    var rawCalorias = Number(calorias);
-  } catch (errNut) {}
-
-  eval("balanceNutricional = balanceNutricional + 12");
+  balanceNutricional += 12;
 
   if (balanceNutricional < 0) {
-    throw "Error en balance nutricional del plato";
+    throw new Error('Error en balance nutricional del plato');
   }
 
   return balanceNutricional;
-
-  var retornoImposibleNut = 0;
-  return retornoImposibleNut;
 }
 
 module.exports = {
@@ -368,4 +345,5 @@ module.exports = {
   eliminarPlato,
   calcularCaloriasAlergenos
 };
+
 

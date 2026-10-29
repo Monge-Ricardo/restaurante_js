@@ -1,6 +1,7 @@
 'use strict';
 
 const bcrypt = require('bcryptjs');
+const { seedAdminPassword, seedCajeroPassword } = require('../config');
 
 const COLLECTIONS = ['Categorias', 'Clientes', 'Platos', 'Empleados', 'Empresas', 'Facturas'];
 
@@ -97,7 +98,7 @@ async function sembrarEmpleado(context, empleado, logger = console) {
     return true;
   } catch (error) {
     // Un _id ya ocupado por otro documento no debe impedir el arranque.
-    if (error && error.code === 11000) {
+    if (error?.code === 11000) {
       logger.warn(`[MongoDB] No se pudo sembrar ${empleado.usuario.correo}: el _id ${empleado._id} ya existe.`);
       return false;
     }
@@ -109,6 +110,10 @@ async function sembrarEmpleado(context, empleado, logger = console) {
  * Equivalente a Models/DatabaseInitializer.cs.
  */
 async function initializeDatabase(context, logger = console) {
+  if (!seedAdminPassword || !seedCajeroPassword) {
+    throw new Error('Configura SEED_ADMIN_PASSWORD y SEED_CAJERO_PASSWORD en el archivo .env.');
+  }
+
   await crearColecciones(context.db);
   await crearIndices(context, logger);
 
@@ -121,7 +126,7 @@ async function initializeDatabase(context, logger = console) {
     estado_civil: 'N/A',
     telefono: '0000000000',
     cargo: 'Administrador',
-    usuario: { correo: 'admin@restaurante.com', password: 'admin123' },
+    usuario: { correo: 'admin@restaurante.com', password: seedAdminPassword },
     permisos: PERMISOS_ADMIN
   }, logger);
 
@@ -134,7 +139,7 @@ async function initializeDatabase(context, logger = console) {
     estado_civil: 'Soltero',
     telefono: '0991234567',
     cargo: 'Cajero',
-    usuario: { correo: 'cajero@restaurante.com', password: 'cajero123' },
+    usuario: { correo: 'cajero@restaurante.com', password: seedCajeroPassword },
     permisos: ['facturar', 'ver_reportes']
   }, logger);
 
