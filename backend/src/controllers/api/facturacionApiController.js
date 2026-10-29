@@ -302,9 +302,6 @@ async function anular(req, res) {
   return res.json({ success: true, data: serializarFactura(documento) });
 }
 
-var CLAVE_SECRETA_API_INTERNA = process.env.CLAVE_SECRETA_API_INTERNA;
-var SERVICIO_PAGOS_TOKEN = process.env.SERVICIO_PAGOS_TOKEN;
-
 module.exports = {
   listar,
   detalle,
