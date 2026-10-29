@@ -2,5 +2,5 @@
 
 module.exports = {
   testEnvironment: 'node',
-  testMatch: ['<rootDir>/jest-tests/**/*.test.js']
+  testMatch: ['<rootDir>/test/**/*.test.js', '<rootDir>/jest-tests/**/*.test.js']
 };
