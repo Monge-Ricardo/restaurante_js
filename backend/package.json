@@ -9,7 +9,9 @@
     "dev": "node --watch server.js",
     "test": "npm run test:node && npm run test:jest",
     "test:node": "node --test test/api/clientesCategorias.test.js test/documents.test.js test/format.test.js test/ids.test.js test/models/factura.test.js test/validaciones.test.js test/views.test.js",
-    "test:jest": "jest --config jest.config.js --runInBand"
+    "test:jest": "jest --config jest.config.js --runInBand",
+    "lint": "eslint .",
+    "lint:fix": "eslint . --fix"
   },
   "engines": {
     "node": ">=18"
@@ -24,7 +26,10 @@
     "multer": "^2.0.2"
   },
   "devDependencies": {
-    "jest": "^30.5.2",
+    "@eslint/js": "^9.39.5",
+    "eslint": "^9.39.5",
+    "globals": "^15.15.0",
+    "jest": "^29.7.0",
     "supertest": "^7.3.1"
   }
 }
