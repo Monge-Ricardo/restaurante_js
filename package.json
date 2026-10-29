@@ -1,0 +1,18 @@
+{
+  "name": "restaurante-workspace",
+  "version": "1.0.0",
+  "private": true,
+  "description": "Workspace raíz del proyecto Restaurante JS",
+  "workspaces": [
+    "backend"
+  ],
+  "scripts": {
+    "start": "npm --workspace=backend start",
+    "dev": "npm --workspace=backend run dev",
+    "test": "npm --workspace=backend test",
+    "test:jest": "npm --workspace=backend run test:jest",
+    "test:node": "npm --workspace=backend run test:node",
+    "lint": "npm --workspace=backend run lint",
+    "lint:fix": "npm --workspace=backend run lint:fix"
+  }
+}
